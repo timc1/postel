@@ -27,6 +27,6 @@ export type Props = {
   customCaretStyles?: Object;
 };
 
-declare module "tooltip" {
+declare module "@timcchang/react-tooltip" {
   export default function Tooltip(props: Props): any;
 }

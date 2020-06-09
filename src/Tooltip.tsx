@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Props } from "../index";
+import { Props } from "../index.d";
 
 const PORTAL_ID = "tooltip";
 
