@@ -116,4 +116,4 @@ Contributions are welcome!
 
 For issues, please feel free to add them [here](https://github.com/timc1/react-tooltip/issues).
 
-Please use `yarn` to manage dependencies. After running `yarn install`, run `yarn start` to get started.
+Please use `yarn` to manage dependencies. After running `yarn install`, run `yarn start`. Navigate to `http://localhost:8080` and start hacking away!
