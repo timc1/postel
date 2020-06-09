@@ -8,6 +8,7 @@
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --config ./example/webpack.config.js --mode development --hot",
+    "build:example": "webpack --config ./example/webpack.prod.js",
     "build": "rm -rf ./lib & tsc",
     "prepublish": "yarn build",
     "test": "echo \"Error: no test specified\" && exit 1"
