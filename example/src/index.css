@@ -1,0 +1,104 @@
+:root {
+  --unit: 4px;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+html {
+  background: #fbfbfd;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 200px));
+  padding: calc(var(--unit) * 4);
+}
+
+.header::after {
+  content: "";
+  height: 1px;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-image: repeating-linear-gradient(
+    -90deg,
+    rgba(0, 0, 0, 0.5),
+    rgba(0, 0, 0, 0.5) 1px,
+    transparent 0,
+    transparent 3px
+  );
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button {
+  position: relative;
+  background: none;
+  border: none;
+  padding: calc(var(--unit) * 2);
+  cursor: pointer;
+  outline: none;
+  border-radius: var(--unit);
+  transition: transform 100ms var(--ease);
+}
+
+.button::before,
+.button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  touch-action: none;
+  border-radius: inherit;
+}
+
+.button::before {
+  background: #ebebf5;
+  opacity: 0;
+  z-index: -1;
+  transition-property: opacity, background;
+  transition-duration: 100ms;
+  transition-timing-function: var(--ease);
+}
+
+.button::after {
+  border: 2px solid #000;
+}
+
+@media (hover) {
+  .button:hover::before {
+    opacity: 1;
+  }
+  .button:active {
+    transform: scale(0.95);
+  }
+}
+
+label {
+  display: block;
+}
