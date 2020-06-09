@@ -15,7 +15,7 @@ A live demo can be found [here](https://react-tooltip.now.sh/).
 ## Installation
 
 ```
-yarn install @timc1/react-tooltip
+yarn install @timcchang/react-tooltip
 ```
 
 ### Basic usage
@@ -23,7 +23,7 @@ yarn install @timc1/react-tooltip
 The simplest way to use `Tooltip` is to wrap it around the component that you want to trigger the tooltip:
 
 ```
-import Tooltip from "@timc1/react-tooltip"
+import Tooltip from "@timcchang/react-tooltip"
 
 export default function App() {
   return(

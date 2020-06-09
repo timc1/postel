@@ -1,6 +1,6 @@
 {
   "name": "@timcchang/react-tooltip",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A tiny, customizable and extensible React tooltip component",
   "main": "lib/index.js",
   "repository": "https://github.com/timc1/react-tooltip",
