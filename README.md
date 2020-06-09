@@ -1,10 +1,9 @@
-<h1 align="center">
-  <span>react-tooltip ✌️</span>
-  <br>
-</h1>
-<p align="center" style="font-size: 1.5rem;">
-  A tiny, customizable and extensible React tooltip component.
-</p>
+# React Tooltip
+
+A tiny, customizable and extensible React tooltip component. ⚡️
+
+[![npm version](https://badge.fury.io/js/%40timcchang%2Freact-tooltip.svg)](https://badge.fury.io/js/%40timcchang%2Freact-tooltip) [![Formatted with Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat)](https://github.com/prettier/prettier) [![TypeScript](https://camo.githubusercontent.com/21132e0838961fbecb75077042aa9b15bc0bf6f9/68747470733a2f2f62616467656e2e6e65742f62616467652f4275696c74253230576974682f547970655363726970742f626c7565)](https://www.typescriptlang.org/)
+
 
 ## Background
 
