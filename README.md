@@ -55,6 +55,10 @@ Wrap `Tooltip` around any DOM element or React component. Because Tooltip uses r
 
 Render custom components as the content of your tooltip.
 
+Using `content`, you can pass custom components that animate like so:
+
+<img src="https://user-images.githubusercontent.com/12195101/84209893-49938b80-aa85-11ea-8f95-e96961a1d13f.gif" width="300" alt="tooltip animating demo" />
+
 ### placement
 
 > "auto"
