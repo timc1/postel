@@ -60,131 +60,139 @@ export default function Demo() {
   return (
     <div className="container">
       <div className="header">
-        <div>
-          <p>Placement</p>
+        <ul>
+          <li>Placement</li>
           {placements.map((placement) => (
-            <label key={placement} htmlFor={placement}>
-              <input
-                id={placement}
-                type="checkbox"
-                checked={state.placement === placement}
-                onChange={() =>
-                  dispatch({
-                    key: "placement",
-                    payload: placement,
-                  })
-                }
-              />
-              {placement}
-            </label>
+            <li key={placement}>
+              <label htmlFor={placement}>
+                <input
+                  id={placement}
+                  type="checkbox"
+                  checked={state.placement === placement}
+                  onChange={() =>
+                    dispatch({
+                      key: "placement",
+                      payload: placement,
+                    })
+                  }
+                />
+                {placement}
+              </label>
+            </li>
           ))}
-        </div>
-        <div>
-          <p>Show trigger</p>
+        </ul>
+        <ul>
+          <li>Show trigger</li>
           {showTriggers.map((showTrigger) => (
-            <label
-              key={`showTrigger-${showTrigger}`}
-              htmlFor={`showTrigger-${showTrigger}`}
-            >
-              <input
-                id={`showTrigger-${showTrigger}`}
-                type="checkbox"
-                checked={state.showTrigger === showTrigger}
-                onChange={() =>
-                  dispatch({
-                    key: "showTrigger",
-                    payload: showTrigger,
-                  })
-                }
-              />
-              {showTrigger}
-            </label>
+            <li key={`showTrigger-${showTrigger}`}>
+              <label htmlFor={`showTrigger-${showTrigger}`}>
+                <input
+                  id={`showTrigger-${showTrigger}`}
+                  type="checkbox"
+                  checked={state.showTrigger === showTrigger}
+                  onChange={() =>
+                    dispatch({
+                      key: "showTrigger",
+                      payload: showTrigger,
+                    })
+                  }
+                />
+                {showTrigger}
+              </label>
+            </li>
           ))}
-        </div>
-        <div>
-          <p>Leave trigger</p>
+        </ul>
+        <ul>
+          <li>Leave trigger</li>
           {leaveTriggers.map((leaveTrigger) => (
-            <label
-              key={`leaveTrigger-${leaveTrigger}`}
-              htmlFor={`leaveTrigger-${leaveTrigger}`}
-            >
+            <li key={`leaveTrigger-${leaveTrigger}`}>
+              <label htmlFor={`leaveTrigger-${leaveTrigger}`}>
+                <input
+                  id={`leaveTrigger-${leaveTrigger}`}
+                  type="checkbox"
+                  checked={state.leaveTrigger === leaveTrigger}
+                  onChange={() =>
+                    dispatch({
+                      key: "leaveTrigger",
+                      payload: leaveTrigger,
+                    })
+                  }
+                />
+                {leaveTrigger}
+              </label>
+            </li>
+          ))}
+        </ul>
+        <ul>
+          <li>Caret</li>
+          <li>
+            <label htmlFor="showCaret">
               <input
-                id={`leaveTrigger-${leaveTrigger}`}
+                id="showCaret"
                 type="checkbox"
-                checked={state.leaveTrigger === leaveTrigger}
+                checked={state.noCaret}
                 onChange={() =>
                   dispatch({
-                    key: "leaveTrigger",
-                    payload: leaveTrigger,
+                    key: "noCaret",
+                    payload: state.noCaret ? false : true,
                   })
                 }
               />
-              {leaveTrigger}
+              noCaret
             </label>
-          ))}
-        </div>
-        <div>
-          <p>Caret</p>
-          <label htmlFor="showCaret">
-            <input
-              id="showCaret"
-              type="checkbox"
-              checked={state.noCaret}
-              onChange={() =>
-                dispatch({
-                  key: "noCaret",
-                  payload: state.noCaret ? false : true,
-                })
-              }
-            />
-            noCaret
-          </label>
-        </div>
-        <div>
-          <p>Content</p>
+          </li>
+        </ul>
+        <ul>
+          <li>Content</li>
           {contentTypes.map((content) => (
-            <label key={content} htmlFor={content}>
-              <input
-                id={content}
-                type="checkbox"
-                checked={state.content === content}
-                onChange={() =>
-                  dispatch({
-                    key: "content",
-                    payload: content,
-                  })
-                }
-              />
-              {content}
-            </label>
+            <li key={content}>
+              <label htmlFor={content}>
+                <input
+                  id={content}
+                  type="checkbox"
+                  checked={state.content === content}
+                  onChange={() =>
+                    dispatch({
+                      key: "content",
+                      payload: content,
+                    })
+                  }
+                />
+                {content}
+              </label>
+            </li>
           ))}
-        </div>
-        <div>
-          <p>Show Delay</p>
-          <input
-            type="number"
-            value={state.showDelay}
-            onChange={(event) => {
-              dispatch({
-                key: "showDelay",
-                payload: event.target.value,
-              });
-            }}
-          />
-        </div>
-        <div>
-          <p>Leave Delay</p>
-          <input
-            type="number"
-            value={state.leaveDelay}
-            onChange={(event) => {
-              dispatch({
-                key: "leaveDelay",
-                payload: event.target.value,
-              });
-            }}
-          />
-        </div>
+        </ul>
+        <ul>
+          <li>Show Delay</li>
+          <li>
+            <input
+              type="number"
+              value={state.showDelay}
+              onChange={(event) => {
+                dispatch({
+                  key: "showDelay",
+                  payload: event.target.value,
+                });
+              }}
+            />
+          </li>
+        </ul>
+        <ul>
+          <li>Leave Delay</li>
+          <li>
+            <input
+              type="number"
+              value={state.leaveDelay}
+              onChange={(event) => {
+                dispatch({
+                  key: "leaveDelay",
+                  payload: event.target.value,
+                });
+              }}
+            />
+          </li>
+        </ul>
       </div>
       <div className="content">
         <Tooltip
@@ -206,7 +214,7 @@ export default function Demo() {
 
 const DemoContent = React.forwardRef((props, ref) => {
   return (
-    <div
+    <ul
       // @ts-ignore
       ref={ref}
       style={{
