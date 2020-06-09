@@ -101,4 +101,5 @@ body {
 
 label {
   display: block;
+  margin-bottom: var(--unit);
 }

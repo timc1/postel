@@ -29,6 +29,8 @@ type State = {
   placement: Placement;
   showTrigger: ShowTrigger;
   leaveTrigger: LeaveTrigger;
+  showDelay?: number;
+  leaveDelay?: number;
   noCaret: boolean;
   title: string;
   content: "none" | "custom";
@@ -38,6 +40,8 @@ const initialState: State = {
   placement: "auto",
   showTrigger: "hover",
   leaveTrigger: "mouseleave",
+  showDelay: undefined,
+  leaveDelay: undefined,
   noCaret: false,
   title: "Trigger me",
   content: "none",
@@ -155,6 +159,32 @@ export default function Demo() {
             </label>
           ))}
         </div>
+        <div>
+          <p>Show Delay</p>
+          <input
+            type="number"
+            value={state.showDelay}
+            onChange={(event) => {
+              dispatch({
+                key: "showDelay",
+                payload: event.target.value,
+              });
+            }}
+          />
+        </div>
+        <div>
+          <p>Leave Delay</p>
+          <input
+            type="number"
+            value={state.leaveDelay}
+            onChange={(event) => {
+              dispatch({
+                key: "leaveDelay",
+                payload: event.target.value,
+              });
+            }}
+          />
+        </div>
       </div>
       <div className="content">
         <Tooltip
@@ -162,6 +192,8 @@ export default function Demo() {
           placement={state.placement}
           showTrigger={state.showTrigger}
           leaveTrigger={state.leaveTrigger}
+          showDelay={state.showDelay}
+          leaveDelay={state.leaveDelay}
           noCaret={state.noCaret}
           content={state.content === "custom" ? <DemoContent /> : null}
         >
