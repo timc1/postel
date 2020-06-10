@@ -43,7 +43,7 @@ const initialState: State = {
   showDelay: undefined,
   leaveDelay: undefined,
   noCaret: false,
-  title: "Trigger me",
+  title: "This is the default tooltip content",
   content: "none",
 };
 
@@ -164,7 +164,9 @@ export default function Demo() {
           ))}
         </ul>
         <ul>
-          <li>Show Delay</li>
+          <li>
+            <p>Show Delay (ms)</p>
+          </li>
           <li>
             <input
               type="number"
@@ -177,9 +179,9 @@ export default function Demo() {
               }}
             />
           </li>
-        </ul>
-        <ul>
-          <li>Leave Delay</li>
+          <li>
+            <p>Leave Delay (ms)</p>
+          </li>
           <li>
             <input
               type="number"
@@ -187,6 +189,23 @@ export default function Demo() {
               onChange={(event) => {
                 dispatch({
                   key: "leaveDelay",
+                  payload: event.target.value,
+                });
+              }}
+            />
+          </li>
+        </ul>
+        <ul>
+          <li>
+            <p>Title</p>
+          </li>
+          <li>
+            <input
+              type="text"
+              value={state.title}
+              onChange={(event) => {
+                dispatch({
+                  key: "title",
                   payload: event.target.value,
                 });
               }}
@@ -214,18 +233,29 @@ export default function Demo() {
 
 const DemoContent = React.forwardRef((props, ref) => {
   return (
-    <ul
+    <div
       // @ts-ignore
       ref={ref}
-      style={{
-        opacity: 0,
-        height: 200,
-        width: 250,
-        boxShadow:
-          "0 0 0 1px rgba(136, 152, 170, 0.1), 0 15px 35px 0 rgba(49, 49, 93, 0.1), 0 5px 15px 0 rgba(0, 0, 0, 0.08)",
-        borderRadius: 8,
-        background: "#fff",
-      }}
-    />
+      className="demo-container"
+    >
+      <div className="demo-header">
+        <img
+          src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=939&q=80"
+          style={{
+            height: 50,
+            width: 50,
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+        />
+        <p className="demo-name">Buddy the dog</p>
+      </div>
+      <div className="demo-content">
+        <p className="demo-info">
+          Hi I'm Buddy, the best dog ever. I love eating and am most happy when
+          I get to eat real human food! 😋
+        </p>
+      </div>
+    </div>
   );
 });

@@ -25,7 +25,7 @@ body {
 .header {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 200px));
+  grid-template-columns: repeat(auto-fill, minmax(75px, 180px));
   padding: calc(var(--unit) * 4);
 }
 
@@ -112,4 +112,35 @@ ul {
 
 ul li:first-of-type {
   margin: calc(var(--unit) * 4) 0;
+}
+
+.demo-container {
+  opacity: 0;
+  width: 275px;
+  box-shadow: 0 0 0 1px rgba(136, 152, 170, 0.1),
+    0 15px 35px 0 rgba(49, 49, 93, 0.1), 0 5px 15px 0 rgba(0, 0, 0, 0.08);
+  border-radius: calc(var(--unit) * 2);
+  background: #fff;
+  padding: calc(var(--unit) * 4.5);
+}
+
+.demo-header {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  grid-gap: calc(var(--unit) * 3);
+  align-items: center;
+}
+
+.demo-name {
+  margin: 0;
+  font-weight: 500;
+}
+
+.demo-content {
+  margin-top: calc(var(--unit) * 4);
+}
+
+.demo-info {
+  margin: 0;
+  line-height: 1.3;
 }
