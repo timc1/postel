@@ -207,7 +207,7 @@ export default function Tooltip(props: Props) {
         // y axis currently directly top of the toggle.
         const toggleY = y - docY;
 
-        const placement = props.placement;
+        const placement = props.placement || "auto";
 
         let caretHeight = 0;
 
