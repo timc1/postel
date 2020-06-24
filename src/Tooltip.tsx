@@ -431,6 +431,7 @@ const defaultCaretStyles = {
   boxShadow: "1px 1px 0 1px rgba(0, 0, 0, 0.02)",
   borderBottomRightRadius: "4px",
   transform: "rotate(45deg)",
+  clipPath: "polygon(100% 0, 0% 100%, 100% 100%)",
 };
 
 const defaultContentStyles = {
