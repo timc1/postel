@@ -16,6 +16,15 @@ export default function Tooltip(props: Props) {
     PORTAL_ID + "-" + Math.random().toString(36).substring(2, 15)
   );
 
+  const onRequestClose = React.useCallback(() => {
+    const node = document.getElementById(id.current);
+    if (node && document.body.contains(node)) {
+      document.body.removeChild(node);
+    }
+    clearTimeout(timeout.current);
+    setShowing(false);
+  }, []);
+
   // Setup listeners
   React.useEffect(() => {
     const toggle = toggleRef.current;
@@ -376,7 +385,11 @@ export default function Tooltip(props: Props) {
               props.content ? (
                 // Make sure that if your content is a React component, wrap it
                 // in React.forwardRef in order for Tooltip's ref to pass through
-                props.content
+                typeof props.content === "function" ? (
+                  props.content({ onRequestClose })
+                ) : (
+                  props.content
+                )
               ) : (
                 <div>{props.title}</div>
               ),
@@ -418,6 +431,7 @@ const defaultCaretStyles = {
   boxShadow: "1px 1px 0 1px rgba(0, 0, 0, 0.02)",
   borderBottomRightRadius: "4px",
   transform: "rotate(45deg)",
+  clipPath: "polygon(100% 0, 0% 100%, 100% 100%)",
 };
 
 const defaultContentStyles = {

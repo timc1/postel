@@ -15,7 +15,9 @@ export type LeaveTrigger = "mouseleave" | "click" | "mouseleave-content";
 
 export type Props = {
   children: React.ReactNode;
-  content?: React.ReactNode;
+  content?: (props: {
+    onRequestClose: () => void;
+  }) => React.ReactNode | React.ReactNode;
   title: string;
   placement?: Placement;
   showTrigger?: ShowTrigger;

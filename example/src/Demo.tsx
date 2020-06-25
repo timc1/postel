@@ -222,7 +222,13 @@ export default function Demo() {
           showDelay={state.showDelay}
           leaveDelay={state.leaveDelay}
           noCaret={state.noCaret}
-          content={state.content === "custom" ? <DemoContent /> : null}
+          content={
+            state.content === "custom"
+              ? ({ onRequestClose }) => (
+                  <DemoContent onRequestClose={onRequestClose} />
+                )
+              : null
+          }
         >
           <button className="button">Trigger</button>
         </Tooltip>
@@ -231,7 +237,11 @@ export default function Demo() {
   );
 }
 
-const DemoContent = React.forwardRef((props, ref) => {
+type DemoProps = {
+  onRequestClose: () => void;
+};
+
+const DemoContent = React.forwardRef((props: DemoProps, ref) => {
   return (
     <div
       // @ts-ignore
@@ -256,6 +266,9 @@ const DemoContent = React.forwardRef((props, ref) => {
           I get to eat real human food! 😋
         </p>
       </div>
+      <button className="button button-close" onClick={props.onRequestClose}>
+        click to close
+      </button>
     </div>
   );
 });
