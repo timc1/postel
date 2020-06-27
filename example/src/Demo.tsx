@@ -33,6 +33,7 @@ type State = {
   showDelay?: number;
   leaveDelay?: number;
   noCaret: boolean;
+  animated: boolean;
   title: string;
   content: "none" | "custom";
 };
@@ -44,6 +45,7 @@ const initialState: State = {
   showDelay: undefined,
   leaveDelay: undefined,
   noCaret: false,
+  animated: false,
   title: "This is the default tooltip content",
   content: "none",
 };
@@ -152,12 +154,19 @@ export default function Demo() {
                   id={content}
                   type="checkbox"
                   checked={state.content === content}
-                  onChange={() =>
+                  onChange={() => {
                     dispatch({
                       key: "content",
                       payload: content,
-                    })
-                  }
+                    });
+
+                    if (content === "none") {
+                      dispatch({
+                        key: "animated",
+                        payload: false,
+                      });
+                    }
+                  }}
                 />
                 {content}
               </label>
@@ -198,6 +207,31 @@ export default function Demo() {
         </ul>
         <ul>
           <li>
+            <p>Animation</p>
+          </li>
+          <li>
+            <label htmlFor="animated">
+              <input
+                id="animated"
+                type="checkbox"
+                checked={state.animated}
+                onChange={() => {
+                  dispatch({
+                    key: "animated",
+                    payload: !state.animated,
+                  });
+                  dispatch({
+                    key: "content",
+                    payload: "custom",
+                  });
+                }}
+              />
+              Animated
+            </label>
+          </li>
+        </ul>
+        <ul>
+          <li>
             <p>Title</p>
           </li>
           <li>
@@ -215,7 +249,9 @@ export default function Demo() {
         </ul>
       </div>
       <div className="content">
-        <AnimatePresence>
+        {/*
+        // @ts-ignore */}
+        <AnimatePresence key={state.animated}>
           <Tooltip
             title={state.title}
             placement={state.placement}
@@ -224,11 +260,14 @@ export default function Demo() {
             showDelay={state.showDelay}
             leaveDelay={state.leaveDelay}
             noCaret={state.noCaret}
-            leaveTransitionMs={500}
+            leaveTransitionMs={state.animated ? 200 : 0}
             content={
               state.content === "custom"
                 ? ({ onRequestClose }) => (
-                    <DemoContent onRequestClose={onRequestClose} animate />
+                    <DemoContent
+                      onRequestClose={onRequestClose}
+                      animate={state.animated}
+                    />
                   )
                 : null
             }
