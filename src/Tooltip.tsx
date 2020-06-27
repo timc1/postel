@@ -6,6 +6,7 @@ const PORTAL_ID = "tooltip";
 
 export default function Tooltip(props: Props) {
   const [isShowing, setShowing] = React.useState(false);
+  const [isTransitioningOut, setTransitioningOut] = React.useState(false);
   const toggleRef = React.useRef<HTMLElement | null>(null);
   const contentRef = React.useRef<HTMLElement | null>(null);
   const caretRef = React.useRef<HTMLElement | null>(null);
@@ -17,12 +18,23 @@ export default function Tooltip(props: Props) {
   );
 
   const onRequestClose = React.useCallback(() => {
-    const node = document.getElementById(id.current);
-    if (node && document.body.contains(node)) {
-      document.body.removeChild(node);
+    const close = () => {
+      clearTimeout(timeout.current);
+      setTransitioningOut(false);
+      setShowing(false);
+
+      const node = document.getElementById(id.current);
+      if (node && document.body.contains(node)) {
+        document.body.removeChild(node);
+      }
+    };
+
+    if (props.leaveTransitionMs) {
+      setTransitioningOut(true);
+      timeout.current = setTimeout(close, props.leaveTransitionMs);
+    } else {
+      close();
     }
-    clearTimeout(timeout.current);
-    setShowing(false);
   }, []);
 
   // Setup listeners
@@ -36,30 +48,31 @@ export default function Tooltip(props: Props) {
     node.style.left = "0";
     node.style.zIndex = "1";
 
-    const cleanupPortal = () => {
-      if (document.body.contains(node)) {
-        document.body.removeChild(node);
-      }
-    };
-
     const setupPortal = () => {
-      cleanupPortal();
-      document.body.appendChild(node);
+      clearTimeout(timeout.current);
+      setTransitioningOut(false);
+
+      const el = document.getElementById(id.current);
+      if (!document.body.contains(el)) {
+        document.body.appendChild(node);
+      }
+
+      // This must go after we append the root node into the DOM.
+      setShowing(true);
     };
 
     const handleMouseEnter = () => {
       clearTimeout(timeout.current);
+      setTransitioningOut(false);
 
       const delay = props.showDelay || 0;
 
       if (delay > 0) {
         timeout.current = setTimeout(() => {
           setupPortal();
-          setShowing(true);
         }, delay);
       } else {
         setupPortal();
-        setShowing(true);
       }
     };
 
@@ -70,12 +83,10 @@ export default function Tooltip(props: Props) {
 
       if (delay > 0) {
         timeout.current = setTimeout(() => {
-          cleanupPortal();
-          setShowing(false);
+          onRequestClose();
         }, delay);
       } else {
-        cleanupPortal();
-        setShowing(false);
+        onRequestClose();
       }
     };
 
@@ -84,22 +95,17 @@ export default function Tooltip(props: Props) {
       // and handleOuterClick, if set, will not be called at this time.
       event.preventDefault();
       event.stopPropagation();
-
-      clearTimeout(timeout.current);
-
       setupPortal();
-      setShowing(true);
     };
 
     const handleOuterClick = (event: MouseEvent) => {
-      clearTimeout(timeout.current);
+      if (isShowing) {
+        const content = contentRef.current;
+        const target = event.target;
 
-      const content = contentRef.current;
-      const target = event.target;
-
-      if (content && !content.contains(target as any)) {
-        cleanupPortal();
-        setShowing(false);
+        if (content && !content.contains(target as any)) {
+          onRequestClose();
+        }
       }
     };
 
@@ -126,8 +132,7 @@ export default function Tooltip(props: Props) {
               return;
             }
 
-            cleanupPortal();
-            setShowing(false);
+            onRequestClose();
           }
         }, delay);
       }
@@ -149,11 +154,11 @@ export default function Tooltip(props: Props) {
         toggle.addEventListener("mouseleave", handleMouseLeave);
       }
 
-      if (leaveTrigger === "click") {
+      if (leaveTrigger === "click" && isShowing) {
         window.addEventListener("click", handleOuterClick);
       }
 
-      if (leaveTrigger === "mouseleave-content") {
+      if (leaveTrigger === "mouseleave-content" && isShowing) {
         window.addEventListener("mouseover", handleMouseLeaveContent);
       }
     }
@@ -167,10 +172,9 @@ export default function Tooltip(props: Props) {
       }
       window.removeEventListener("click", handleOuterClick);
       window.removeEventListener("mouseover", handleMouseLeaveContent);
-      clearTimeout(timeout.current);
-      cleanupPortal();
     };
   }, [
+    isShowing,
     props.showTrigger,
     props.leaveTrigger,
     props.showDelay,
@@ -375,6 +379,8 @@ export default function Tooltip(props: Props) {
     return React.cloneElement(child, { ref, ...props });
   };
 
+  const transitionProps = props.content ? { isTransitioningOut } : {};
+
   return (
     <>
       {mapRefToChild(props.children, toggleRef)}
@@ -396,6 +402,7 @@ export default function Tooltip(props: Props) {
               contentRef,
               {
                 title: props.title,
+                ...transitionProps,
                 style: {
                   // This ensures that we never get a second of flashing from the top left
                   // to when the node gets transformed to its position.
