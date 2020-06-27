@@ -15,9 +15,7 @@ export type LeaveTrigger = "mouseleave" | "click" | "mouseleave-content";
 
 export type Props = {
   children: React.ReactNode;
-  content?: (props: {
-    onRequestClose: () => void;
-  }) => React.ReactNode | React.ReactNode;
+  content?: React.ReactNode;
   title: string;
   placement?: Placement;
   showTrigger?: ShowTrigger;
@@ -27,6 +25,7 @@ export type Props = {
   leaveDelay?: number;
   customContentStyles?: Object;
   customCaretStyles?: Object;
+  leaveTransitionMs?: number;
 };
 
 declare module "@timcchang/react-tooltip" {
