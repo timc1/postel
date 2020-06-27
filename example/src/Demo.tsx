@@ -2,6 +2,7 @@ import * as React from "react";
 import "./index.css";
 import Tooltip from "../../src/index";
 import { Placement, ShowTrigger, LeaveTrigger } from "../../index";
+import { AnimatePresence, motion } from "framer-motion";
 
 const placements: Placement[] = [
   "auto",
@@ -32,6 +33,7 @@ type State = {
   showDelay?: number;
   leaveDelay?: number;
   noCaret: boolean;
+  animated: boolean;
   title: string;
   content: "none" | "custom";
 };
@@ -43,6 +45,7 @@ const initialState: State = {
   showDelay: undefined,
   leaveDelay: undefined,
   noCaret: false,
+  animated: false,
   title: "This is the default tooltip content",
   content: "none",
 };
@@ -151,12 +154,19 @@ export default function Demo() {
                   id={content}
                   type="checkbox"
                   checked={state.content === content}
-                  onChange={() =>
+                  onChange={() => {
                     dispatch({
                       key: "content",
                       payload: content,
-                    })
-                  }
+                    });
+
+                    if (content === "none") {
+                      dispatch({
+                        key: "animated",
+                        payload: false,
+                      });
+                    }
+                  }}
                 />
                 {content}
               </label>
@@ -197,6 +207,31 @@ export default function Demo() {
         </ul>
         <ul>
           <li>
+            <p>Animation</p>
+          </li>
+          <li>
+            <label htmlFor="animated">
+              <input
+                id="animated"
+                type="checkbox"
+                checked={state.animated}
+                onChange={() => {
+                  dispatch({
+                    key: "animated",
+                    payload: !state.animated,
+                  });
+                  dispatch({
+                    key: "content",
+                    payload: "custom",
+                  });
+                }}
+              />
+              Animated
+            </label>
+          </li>
+        </ul>
+        <ul>
+          <li>
             <p>Title</p>
           </li>
           <li>
@@ -214,24 +249,32 @@ export default function Demo() {
         </ul>
       </div>
       <div className="content">
-        <Tooltip
-          title={state.title}
-          placement={state.placement}
-          showTrigger={state.showTrigger}
-          leaveTrigger={state.leaveTrigger}
-          showDelay={state.showDelay}
-          leaveDelay={state.leaveDelay}
-          noCaret={state.noCaret}
-          content={
-            state.content === "custom"
-              ? ({ onRequestClose }) => (
-                  <DemoContent onRequestClose={onRequestClose} />
-                )
-              : null
-          }
-        >
-          <button className="button">Trigger</button>
-        </Tooltip>
+        {/*
+        // @ts-ignore */}
+        <AnimatePresence key={state.animated}>
+          <Tooltip
+            title={state.title}
+            placement={state.placement}
+            showTrigger={state.showTrigger}
+            leaveTrigger={state.leaveTrigger}
+            showDelay={state.showDelay}
+            leaveDelay={state.leaveDelay}
+            noCaret={state.noCaret}
+            leaveTransitionMs={state.animated ? 200 : 0}
+            content={
+              state.content === "custom"
+                ? ({ onRequestClose }) => (
+                    <DemoContent
+                      onRequestClose={onRequestClose}
+                      animate={state.animated}
+                    />
+                  )
+                : null
+            }
+          >
+            <button className="button">Trigger</button>
+          </Tooltip>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -239,36 +282,67 @@ export default function Demo() {
 
 type DemoProps = {
   onRequestClose: () => void;
+  animate?: boolean;
+  // Comes directly from Tooltip
+  isTransitioningOut?: boolean;
 };
 
 const DemoContent = React.forwardRef((props: DemoProps, ref) => {
+  const motionProps = props.animate
+    ? {
+        className: "demo-container",
+        // framer-motion props
+        initial: { scale: 0.9, opacity: 0 },
+        animate: { scale: 1, opacity: 1 },
+        exit: { scale: 0.98, opacity: 0 },
+        transition: {
+          type: "spring",
+          damping: 20,
+          stiffness: 400,
+        },
+      }
+    : {
+        ref,
+        className: "demo-container",
+      };
+
   return (
-    <div
-      // @ts-ignore
-      ref={ref}
-      className="demo-container"
-    >
-      <div className="demo-header">
-        <img
-          src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=939&q=80"
-          style={{
-            height: 50,
-            width: 50,
-            borderRadius: "50%",
-            objectFit: "cover",
-          }}
-        />
-        <p className="demo-name">Buddy the dog</p>
-      </div>
-      <div className="demo-content">
-        <p className="demo-info">
-          Hi I'm Buddy, the best dog ever. I love eating and am most happy when
-          I get to eat real human food! 😋
-        </p>
-      </div>
-      <button className="button button-close" onClick={props.onRequestClose}>
-        click to close
-      </button>
-    </div>
+    <AnimatePresence>
+      {!props.isTransitioningOut && (
+        <div
+          // @ts-ignore
+          ref={props.animate ? ref : undefined}
+        >
+          {/*
+           // @ts-ignore */}
+          <motion.div {...motionProps}>
+            <div className="demo-header">
+              <img
+                src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=939&q=80"
+                style={{
+                  height: 50,
+                  width: 50,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
+              />
+              <p className="demo-name">Buddy the dog</p>
+            </div>
+            <div className="demo-content">
+              <p className="demo-info">
+                Hi I'm Buddy, the best dog ever. I love eating and am most happy
+                when I get to eat real human food! 😋
+              </p>
+            </div>
+            <button
+              className="button button-close"
+              onClick={props.onRequestClose}
+            >
+              click to close
+            </button>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 });
