@@ -20,10 +20,10 @@ export default function Tooltip(props: Props) {
   const onRequestClose = React.useCallback(() => {
     const close = () => {
       clearTimeout(timeout.current);
-
-      const node = document.getElementById(id.current);
       setTransitioningOut(false);
       setShowing(false);
+
+      const node = document.getElementById(id.current);
       if (node && document.body.contains(node)) {
         document.body.removeChild(node);
       }
@@ -57,6 +57,7 @@ export default function Tooltip(props: Props) {
         document.body.appendChild(node);
       }
 
+      // This must go after we append the root node into the DOM.
       setShowing(true);
     };
 
