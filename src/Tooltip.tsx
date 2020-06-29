@@ -144,8 +144,7 @@ export default function Tooltip(props: Props) {
 
       const top = toggleY - contentHeight - halfHeightOfCaret;
       const bottom = toggleY + toggleHeight + halfHeightOfCaret;
-      const center = (position.content.x =
-        toggleX + halfWidthOfToggle - contentWidth / 2);
+      const center = toggleX + halfWidthOfToggle - contentWidth / 2;
       const end = toggleX + toggleWidth - contentWidth;
 
       let placement = props.placement || "auto";
@@ -366,7 +365,7 @@ export default function Tooltip(props: Props) {
       const content = contentRef.current;
       const caret = caretRef.current;
 
-      // 50ms allows enough time for a user to mouseover from the toggle to the content.
+      // 100ms allows enough time for a user to mouseover from the toggle to the content.
       // Otherwise, an immediate calculation is too quick and the slight gap between the
       // toggle and will remove the content.
       const delay =
@@ -441,8 +440,8 @@ export default function Tooltip(props: Props) {
     }
   }, [state.isShowing, props.title]);
 
-  const mapRefToChild = (child: any, ref: any, props?: Object) => {
-    return React.cloneElement(child, { ref, ...child.props, ...props });
+  const mapRefToChild = (child: any, ref: any) => {
+    return React.cloneElement(child, { ref, ...child.props });
   };
 
   const root = document.getElementById(id.current);
