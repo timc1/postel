@@ -32,7 +32,6 @@ type State = {
   leaveTrigger: LeaveTrigger;
   showDelay?: number;
   leaveDelay?: number;
-  noCaret: boolean;
   animated: boolean;
   title: string;
   content: "none" | "custom";
@@ -44,7 +43,6 @@ const initialState: State = {
   leaveTrigger: "mouseleave",
   showDelay: undefined,
   leaveDelay: undefined,
-  noCaret: false,
   animated: false,
   title: "This is the default tooltip content",
   content: "none",
@@ -127,25 +125,6 @@ export default function Demo() {
           ))}
         </ul>
         <ul>
-          <li>Caret</li>
-          <li>
-            <label htmlFor="showCaret">
-              <input
-                id="showCaret"
-                type="checkbox"
-                checked={state.noCaret}
-                onChange={() =>
-                  dispatch({
-                    key: "noCaret",
-                    payload: state.noCaret ? false : true,
-                  })
-                }
-              />
-              noCaret
-            </label>
-          </li>
-        </ul>
-        <ul>
           <li>Content</li>
           {contentTypes.map((content) => (
             <li key={content}>
@@ -159,13 +138,6 @@ export default function Demo() {
                       key: "content",
                       payload: content,
                     });
-
-                    if (content === "none") {
-                      dispatch({
-                        key: "animated",
-                        payload: false,
-                      });
-                    }
                   }}
                 />
                 {content}
@@ -220,10 +192,6 @@ export default function Demo() {
                     key: "animated",
                     payload: !state.animated,
                   });
-                  dispatch({
-                    key: "content",
-                    payload: "custom",
-                  });
                 }}
               />
               Animated
@@ -249,98 +217,151 @@ export default function Demo() {
         </ul>
       </div>
       <div className="content">
-        {/*
-        // @ts-ignore */}
-        <AnimatePresence key={state.animated}>
-          <Tooltip
-            title={state.title}
-            placement={state.placement}
-            showTrigger={state.showTrigger}
-            leaveTrigger={state.leaveTrigger}
-            showDelay={state.showDelay}
-            leaveDelay={state.leaveDelay}
-            noCaret={state.noCaret}
-            leaveTransitionMs={state.animated ? 200 : 0}
-            content={
-              state.content === "custom"
-                ? ({ onRequestClose }) => (
-                    <DemoContent
-                      onRequestClose={onRequestClose}
-                      animate={state.animated}
-                    />
-                  )
-                : null
-            }
-          >
-            <button className="button">Trigger</button>
-          </Tooltip>
-        </AnimatePresence>
+        <Tooltip
+          title={state.title}
+          placement={state.placement}
+          showTrigger={state.showTrigger}
+          leaveTrigger={state.leaveTrigger}
+          showDelay={state.showDelay}
+          leaveDelay={state.leaveDelay}
+          leaveTransitionMs={state.animated ? 200 : undefined}
+          content={({ placement, isTransitioningOut, onRequestClose }) => (
+            <DemoContent
+              animated={state.animated}
+              isTransitioningOut={isTransitioningOut}
+              content={
+                state.content === "custom" ? (
+                  <DoggyDemo onRequestClose={onRequestClose} />
+                ) : (
+                  state.title
+                )
+              }
+            />
+          )}
+          caret={({ placement, isTransitioningOut }) => (
+            <DemoCaret
+              animated={state.animated}
+              isTransitioningOut={isTransitioningOut}
+              caretColor={state.content === "custom" ? "#fff" : "#000"}
+            />
+          )}
+        >
+          <button className="button">Trigger</button>
+        </Tooltip>
       </div>
     </div>
   );
 }
 
-type DemoProps = {
+type DoggyDemoProps = {
   onRequestClose: () => void;
-  animate?: boolean;
-  // Comes directly from Tooltip
-  isTransitioningOut?: boolean;
 };
 
-const DemoContent = React.forwardRef((props: DemoProps, ref) => {
-  const motionProps = props.animate
-    ? {
-        className: "demo-container",
-        // framer-motion props
-        initial: { scale: 0.9, opacity: 0 },
-        animate: { scale: 1, opacity: 1 },
-        exit: { scale: 0.98, opacity: 0 },
-        transition: {
-          type: "spring",
-          damping: 20,
-          stiffness: 400,
-        },
-      }
-    : {
-        ref,
-        className: "demo-container",
-      };
+const DoggyDemo = (props: DoggyDemoProps) => {
+  return (
+    <div className="demo-container">
+      <div className="demo-header">
+        <img
+          src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=939&q=80"
+          style={{
+            height: 50,
+            width: 50,
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+        />
+        <p className="demo-name">Buddy the dog</p>
+      </div>
+      <div className="demo-content">
+        <p className="demo-info">
+          Hi I'm Buddy, the best dog ever. I love eating and am most happy when
+          I get to eat real human food! 😋
+        </p>
+      </div>
+      <button className="button button-close" onClick={props.onRequestClose}>
+        click to close
+      </button>
+    </div>
+  );
+};
+
+type DemoContentProps = {
+  animated: boolean;
+  content: string | React.ReactNode;
+  isTransitioningOut: boolean;
+};
+
+const DemoContent = React.forwardRef((props: DemoContentProps, ref: any) => {
+  const motionProps = props.animated && {
+    initial: { scale: 0.9, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    exit: { scale: 0.98, opacity: 0 },
+    transition: {
+      type: "spring",
+      damping: 20,
+      stiffness: 400,
+    },
+  };
+
+  return (
+    <AnimatePresence>
+      {!props.isTransitioningOut && (
+        <div ref={ref} style={{ outline: "none" }}>
+          <motion.div
+            {...motionProps}
+            style={
+              typeof props.content === "string" && {
+                background: "#000",
+                padding: "8px",
+                color: "#fff",
+                fontSize: "13px",
+              }
+            }
+          >
+            {props.content}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+});
+
+type DemoCaretProps = {
+  animated: boolean;
+  isTransitioningOut: boolean;
+  caretColor: string;
+};
+
+const DemoCaret = React.forwardRef((props: DemoCaretProps, ref: any) => {
+  const motionProps = props.animated && {
+    initial: { scale: 0.9, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    exit: { scale: 0, opacity: 0 },
+    transition: {
+      type: "spring",
+      damping: 20,
+      stiffness: 400,
+    },
+  };
 
   return (
     <AnimatePresence>
       {!props.isTransitioningOut && (
         <div
-          // @ts-ignore
-          ref={props.animate ? ref : undefined}
+          ref={ref}
+          style={{
+            filter: "drop-shadow(rgba(50, 50, 0, 0.5) -1px 16px 6px)",
+          }}
         >
-          {/*
-           // @ts-ignore */}
-          <motion.div {...motionProps}>
-            <div className="demo-header">
-              <img
-                src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=939&q=80"
-                style={{
-                  height: 50,
-                  width: 50,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                }}
-              />
-              <p className="demo-name">Buddy the dog</p>
-            </div>
-            <div className="demo-content">
-              <p className="demo-info">
-                Hi I'm Buddy, the best dog ever. I love eating and am most happy
-                when I get to eat real human food! 😋
-              </p>
-            </div>
-            <button
-              className="button button-close"
-              onClick={props.onRequestClose}
-            >
-              click to close
-            </button>
-          </motion.div>
+          <motion.div
+            {...motionProps}
+            style={{
+              height: 10,
+              width: 10,
+              background: props.caretColor,
+              clipPath: "polygon(100% 0, 0% 100%, 100% 100%)",
+            }}
+          ></motion.div>
         </div>
       )}
     </AnimatePresence>
