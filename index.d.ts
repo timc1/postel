@@ -22,6 +22,7 @@ export type State = {
   contentPosition: ContentPosition;
   caretPosition: CaretPosition;
   placement: Placement;
+  activeElement: HTMLElement | null;
 };
 
 export type ShowTrigger = "hover" | "click";

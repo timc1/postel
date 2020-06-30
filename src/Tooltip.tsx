@@ -12,6 +12,9 @@ import {
 type Action =
   | {
       type: "TOGGLE_SHOW";
+      payload: {
+        activeElement: HTMLElement;
+      };
     }
   | {
       type: "TOGGLE_HIDE";
@@ -33,6 +36,7 @@ function reducer(state: State, action: Action) {
         ...state,
         isShowing: true,
         isTransitioningOut: false,
+        activeElement: action.payload.activeElement,
       };
     case "TOGGLE_HIDE":
       return {
@@ -40,6 +44,7 @@ function reducer(state: State, action: Action) {
         isShowing: false,
         isShowingContent: false,
         isTransitioningOut: false,
+        activeElement: null,
       };
     case "SET_POSITION": {
       return {
@@ -72,6 +77,7 @@ export default function Tooltip(props: Props) {
     contentPosition: { x: 0, y: 0 },
     caretPosition: { x: 0, y: 0, transformOrigin: "0 0 ", rotate: "45deg" },
     placement: props.placement || "auto",
+    activeElement: null,
   };
 
   const timeout = React.useRef<any>(null);
@@ -287,6 +293,9 @@ export default function Tooltip(props: Props) {
     const setShow = () => {
       dispatch({
         type: "TOGGLE_SHOW",
+        payload: {
+          activeElement: document.activeElement as HTMLElement,
+        },
       });
     };
 
@@ -301,7 +310,11 @@ export default function Tooltip(props: Props) {
     clearTimeout(timeout.current);
 
     const actuallyHide = () => {
-      // 1. Remove portal node from the DOM.
+      // Set focus back on where the user was previously.
+      if (state.activeElement) {
+        state.activeElement.focus();
+      }
+
       const node = document.getElementById(id.current);
 
       if (node) {
@@ -311,12 +324,6 @@ export default function Tooltip(props: Props) {
       dispatch({
         type: "TOGGLE_HIDE",
       });
-
-      const toggle = toggleRef.current;
-
-      if (toggle) {
-        toggle.focus();
-      }
     };
 
     const triggerHide = () => {
@@ -338,7 +345,7 @@ export default function Tooltip(props: Props) {
     } else {
       triggerHide();
     }
-  }, [props.leaveDelay, props.leaveTransitionMs]);
+  }, [props.leaveDelay, props.leaveTransitionMs, state.activeElement]);
 
   React.useEffect(() => {
     const toggle = toggleRef.current;
@@ -512,7 +519,7 @@ type PositionerProps = {
 };
 
 function Positioner(props: PositionerProps) {
-  const { position: pos, ...rest } = props;
+  const { position: pos, isShowing, ...rest } = props;
   const position = pos as any; // Uhh Typescript 🙈
   const translate = `translate3d(${position.x}px, ${position.y}px, 0px)`;
   const transform = position.rotate
@@ -525,7 +532,7 @@ function Positioner(props: PositionerProps) {
     left: "0",
     transformOrigin: position.transformOrigin,
     transform,
-    opacity: props.isShowing ? 1 : 0,
+    opacity: isShowing ? 1 : 0,
   };
   return (
     <div style={style} {...rest}>

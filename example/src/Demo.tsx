@@ -289,7 +289,6 @@ type DemoContentProps = {
   animated: boolean;
   content: string | React.ReactNode;
   isTransitioningOut: boolean;
-  label: string;
 };
 
 const DemoContent = React.forwardRef((props: DemoContentProps, ref: any) => {
