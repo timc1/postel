@@ -4,6 +4,7 @@ A tiny, customizable and extensible React tooltip component. ⚡️
 
 [![npm version](https://badge.fury.io/js/%40timcchang%2Freact-tooltip.svg)](https://badge.fury.io/js/%40timcchang%2Freact-tooltip) [![Formatted with Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat)](https://github.com/prettier/prettier) [![TypeScript](https://camo.githubusercontent.com/21132e0838961fbecb75077042aa9b15bc0bf6f9/68747470733a2f2f62616467656e2e6e65742f62616467652f4275696c74253230576974682f547970655363726970742f626c7565)](https://www.typescriptlang.org/)
 
+
 ## Background
 
 You want to build a tooltip experience on your site and want to have full control over the look and feel without needing to worry about positioning. You want it to be simple, flexible, and fully extensible to your needs.
@@ -24,9 +25,8 @@ The simplest way to use `Tooltip` is to wrap it around the component that you wa
 import Tooltip from "@timcchang/react-tooltip"
 
 export default function App() {
-  const content = "Password needs to match;
   return(
-    <Tooltip title={content} content={content}>
+    <Tooltip title="Password needs to match">
       <button>Register</button>
     </Tooltip>
   )
@@ -47,7 +47,7 @@ Wrap `Tooltip` around any DOM element or React component. Because Tooltip uses r
 
 > `string` | _required_
 
-`title` an explicit title label for the tooltip.
+`title` will always be present - if no `content` is provided, this will be the UI that will display.
 
 ### content
 
@@ -57,15 +57,7 @@ Render custom components as the content of your tooltip.
 
 Using `content`, you can pass custom components that animate like so:
 
-<img
-src="https://user-images.githubusercontent.com/12195101/84209893-49938b80-aa85-11ea-8f95-e96961a1d13f.gif"
-width="300" alt="tooltip animating demo" />
-
-### caret
-
-> `React.ReactNode`
-
-Render a custom caret. See `/example/src/Demo.tsx` for an example of default styles.
+<img src="https://user-images.githubusercontent.com/12195101/84209893-49938b80-aa85-11ea-8f95-e96961a1d13f.gif" width="300" alt="tooltip animating demo" />
 
 ### placement
 
@@ -91,23 +83,35 @@ This is what will trigger the tooltip to show.
 
 This is what will hide the tooltip.
 
+### noCaret
+
+> boolean / defaults to `false`
+
+This is a flag for showing or hiding the caret.
+
 ### showDelay
 
 > number
 
-Show the tooltip this amount of time (ms) after `showTrigger` fires.
+Trigger the tooltip after n milliseconds.
 
 ### hideDelay
 
 > number
 
-Hide the tooltip this amount of time (ms) after `leaveTrigger` fires.
+Hide the tooltip n milliseconds after `leaveTrigger` fires.
 
-### leaveTransitionMs
+### customContentStyles
 
-> number
+> Object
 
-This is the amount of time (ms) you want your component to transition out.
+Customize the `Tooltip`'s content styles.
+
+### customCaretStyles
+
+> Object
+
+Customize the `Tooltip`'s caret styles.
 
 ## Contributing
 

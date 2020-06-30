@@ -115,12 +115,13 @@ ul li:first-of-type {
 }
 
 .demo-container {
+  opacity: 0;
   width: 275px;
   box-shadow: 0 0 0 1px rgba(136, 152, 170, 0.1),
     0 15px 35px 0 rgba(49, 49, 93, 0.1), 0 5px 15px 0 rgba(0, 0, 0, 0.08);
   border-radius: calc(var(--unit) * 2);
-  padding: calc(var(--unit) * 4.5);
   background: #fff;
+  padding: calc(var(--unit) * 4.5);
 }
 
 .demo-header {
