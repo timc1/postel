@@ -289,6 +289,7 @@ type DemoContentProps = {
   animated: boolean;
   content: string | React.ReactNode;
   isTransitioningOut: boolean;
+  label: string;
 };
 
 const DemoContent = React.forwardRef((props: DemoContentProps, ref: any) => {
@@ -306,7 +307,7 @@ const DemoContent = React.forwardRef((props: DemoContentProps, ref: any) => {
   return (
     <AnimatePresence>
       {!props.isTransitioningOut && (
-        <div ref={ref}>
+        <div ref={ref} style={{ outline: "none" }}>
           <motion.div
             {...motionProps}
             style={

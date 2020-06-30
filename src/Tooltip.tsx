@@ -311,6 +311,12 @@ export default function Tooltip(props: Props) {
       dispatch({
         type: "TOGGLE_HIDE",
       });
+
+      const toggle = toggleRef.current;
+
+      if (toggle) {
+        toggle.focus();
+      }
     };
 
     const triggerHide = () => {
@@ -437,11 +443,17 @@ export default function Tooltip(props: Props) {
         type: "SET_POSITION",
         payload: position,
       });
+
+      const content = contentRef.current;
+      if (content) {
+        content.tabIndex = 0;
+        content.focus();
+      }
     }
   }, [state.isShowing, props.title]);
 
-  const mapRefToChild = (child: any, ref: any) => {
-    return React.cloneElement(child, { ref, ...child.props });
+  const mapRefToChild = (child: any, ref: any, props?: any) => {
+    return React.cloneElement(child, { ref, ...child.props, ...props });
   };
 
   const root = document.getElementById(id.current);
@@ -462,6 +474,8 @@ export default function Tooltip(props: Props) {
             <Positioner
               position={state.contentPosition}
               isShowing={state.isShowingContent}
+              role="tooltip"
+              title={props.title}
             >
               {props.content &&
                 mapRefToChild(
@@ -494,11 +508,13 @@ type PositionerProps = {
   children?: React.ReactNode;
   position: ContentPosition | CaretPosition;
   isShowing: boolean;
+  [k: string]: any;
 };
 
 function Positioner(props: PositionerProps) {
-  const position = props.position as any;
-  const translate = `translate3d(${props.position.x}px, ${props.position.y}px, 0px)`;
+  const { position: pos, ...rest } = props;
+  const position = pos as any; // Uhh Typescript 🙈
+  const translate = `translate3d(${position.x}px, ${position.y}px, 0px)`;
   const transform = position.rotate
     ? `${translate} rotate(${position.rotate})`
     : translate;
@@ -511,5 +527,9 @@ function Positioner(props: PositionerProps) {
     transform,
     opacity: props.isShowing ? 1 : 0,
   };
-  return <div style={style}>{props.children}</div>;
+  return (
+    <div style={style} {...rest}>
+      {props.children}
+    </div>
+  );
 }
