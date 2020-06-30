@@ -224,7 +224,7 @@ export default function Demo() {
           leaveTrigger={state.leaveTrigger}
           showDelay={state.showDelay}
           leaveDelay={state.leaveDelay}
-          leaveTransitionMs={state.animated ? 200 : undefined}
+          leaveTransitionMs={state.animated ? 800 : undefined}
           content={({ placement, isTransitioningOut, onRequestClose }) => (
             <DemoContent
               animated={state.animated}

@@ -13,6 +13,7 @@ export type Props = {
   showDelay?: number;
   leaveDelay?: number;
   leaveTransitionMs?: number;
+  preventAutoFocus?: boolean;
 };
 
 export type State = {
@@ -56,3 +57,7 @@ export type Placement =
   | "bottom-start"
   | "left"
   | "right";
+
+declare module "@timcchang/react-tooltip" {
+  export default function Tooltip(props: Props): any;
+}

@@ -279,8 +279,6 @@ export default function Tooltip(props: Props) {
   }, [props.placement]);
 
   const show = React.useCallback(() => {
-    clearTimeout(timeout.current);
-
     // 1. Add portal node into the DOM.
     const node = document.getElementById(id.current);
 
@@ -291,6 +289,8 @@ export default function Tooltip(props: Props) {
     }
 
     const setShow = () => {
+      clearTimeout(timeout.current);
+
       dispatch({
         type: "TOGGLE_SHOW",
         payload: {
@@ -307,11 +307,11 @@ export default function Tooltip(props: Props) {
   }, [props.showDelay]);
 
   const hide = React.useCallback(() => {
-    clearTimeout(timeout.current);
-
     const actuallyHide = () => {
+      clearTimeout(timeout.current);
+
       // Set focus back on where the user was previously.
-      if (state.activeElement) {
+      if (state.activeElement && !props.preventAutoFocus) {
         state.activeElement.focus();
       }
 
@@ -320,7 +320,6 @@ export default function Tooltip(props: Props) {
       if (node) {
         document.body.removeChild(node);
       }
-
       dispatch({
         type: "TOGGLE_HIDE",
       });
@@ -345,7 +344,20 @@ export default function Tooltip(props: Props) {
     } else {
       triggerHide();
     }
-  }, [props.leaveDelay, props.leaveTransitionMs, state.activeElement]);
+  }, [
+    props.leaveDelay,
+    props.leaveTransitionMs,
+    state.activeElement,
+    props.preventAutoFocus,
+  ]);
+
+  const positionNode = React.useCallback(() => {
+    const position = calculateContentPosition();
+    dispatch({
+      type: "SET_POSITION",
+      payload: position,
+    });
+  }, [calculateContentPosition]);
 
   React.useEffect(() => {
     const toggle = toggleRef.current;
@@ -400,6 +412,10 @@ export default function Tooltip(props: Props) {
       }, delay);
     };
 
+    const handleResize = () => {
+      positionNode();
+    };
+
     const setupListeners = () => {
       if (toggle) {
         // Show triggers
@@ -424,7 +440,13 @@ export default function Tooltip(props: Props) {
           window.addEventListener("mouseover", handleMouseLeaveContent);
         }
       }
+
+      if (state.isShowing) {
+        window.addEventListener("resize", handleResize);
+      }
     };
+
+    setupListeners();
 
     const cleanupListeners = () => {
       if (toggle) {
@@ -434,30 +456,25 @@ export default function Tooltip(props: Props) {
       }
       window.removeEventListener("click", handleOuterClick);
       window.removeEventListener("mouseover", handleMouseLeaveContent);
+      window.removeEventListener("resize", handleResize);
     };
-
-    setupListeners();
 
     return () => {
       cleanupListeners();
     };
-  }, [state.isShowing, showTrigger, leaveTrigger, show]);
+  }, [state.isShowing, showTrigger, leaveTrigger, show, positionNode]);
 
   React.useEffect(() => {
     if (state.isShowing) {
-      const position = calculateContentPosition();
-      dispatch({
-        type: "SET_POSITION",
-        payload: position,
-      });
+      positionNode();
 
       const content = contentRef.current;
-      if (content) {
+      if (content && !props.preventAutoFocus) {
         content.tabIndex = 0;
         content.focus();
       }
     }
-  }, [state.isShowing, props.title]);
+  }, [state.isShowing, props.title, positionNode]);
 
   const mapRefToChild = (child: any, ref: any, props?: any) => {
     return React.cloneElement(child, { ref, ...child.props, ...props });
@@ -478,32 +495,34 @@ export default function Tooltip(props: Props) {
         root &&
         ReactDOM.createPortal(
           <React.Fragment>
-            <Positioner
-              position={state.contentPosition}
-              isShowing={state.isShowingContent}
-              role="tooltip"
-              title={props.title}
-            >
-              {props.content &&
-                mapRefToChild(
+            {props.content && (
+              <Positioner
+                position={state.contentPosition}
+                isShowing={state.isShowingContent}
+                role="tooltip"
+                title={props.title}
+              >
+                {mapRefToChild(
                   typeof props.content === "function"
                     ? props.content(renderProps)
                     : props.content,
                   contentRef
                 )}
-            </Positioner>
-            <Positioner
-              position={state.caretPosition}
-              isShowing={state.isShowingContent}
-            >
-              {props.caret &&
-                mapRefToChild(
+              </Positioner>
+            )}
+            {props.caret && (
+              <Positioner
+                position={state.caretPosition}
+                isShowing={state.isShowingContent}
+              >
+                {mapRefToChild(
                   typeof props.caret === "function"
                     ? props.caret(renderProps)
                     : props.caret,
                   caretRef
                 )}
-            </Positioner>
+              </Positioner>
+            )}
           </React.Fragment>,
           root
         )}
@@ -533,6 +552,7 @@ function Positioner(props: PositionerProps) {
     transformOrigin: position.transformOrigin,
     transform,
     opacity: isShowing ? 1 : 0,
+    zIndex: 99999,
   };
   return (
     <div style={style} {...rest}>
