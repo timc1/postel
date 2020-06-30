@@ -95,13 +95,13 @@ This is what will hide the tooltip.
 
 > number
 
-Trigger the tooltip after n milliseconds.
+Show the tooltip this amount of time (ms) after `showTrigger` fires.
 
 ### hideDelay
 
 > number
 
-Hide the tooltip n milliseconds after `leaveTrigger` fires.
+Hide the tooltip this amount of time (ms) after `leaveTrigger` fires.
 
 ### leaveTransitionMs
 
