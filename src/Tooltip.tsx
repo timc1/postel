@@ -316,6 +316,7 @@ export default function Tooltip(props: Props) {
       if (node) {
         document.body.removeChild(node);
       }
+
       dispatch({
         type: "TOGGLE_HIDE",
       });
