@@ -477,8 +477,6 @@ export default function Tooltip(props: Props) {
     }
   }, [state.isShowing, props.title, positionNode]);
 
-  const [mounted, setMounted] = React.useState(false);
-
   const mapRefToChild = (child: any, ref: any, props?: any) => {
     return React.cloneElement(child, { ref, ...child.props, ...props });
   };
