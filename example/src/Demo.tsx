@@ -224,7 +224,10 @@ export default function Demo() {
           leaveTrigger={state.leaveTrigger}
           showDelay={state.showDelay}
           leaveDelay={state.leaveDelay}
-          leaveTransitionMs={state.animated ? 200 : undefined}
+          showTransparentOverlay={
+            state.content === "custom" && state.leaveTrigger !== "mouseleave"
+          }
+          leaveTransitionMs={state.animated ? 150 : undefined}
           content={({ placement, isTransitioningOut, onRequestClose }) => (
             <DemoContent
               animated={state.animated}
@@ -297,9 +300,8 @@ const DemoContent = React.forwardRef((props: DemoContentProps, ref: any) => {
     animate: { scale: 1, opacity: 1 },
     exit: { scale: 0.98, opacity: 0 },
     transition: {
-      type: "spring",
-      damping: 20,
-      stiffness: 400,
+      ease: "easeInOut",
+      duration: 0.12,
     },
   };
 
@@ -338,9 +340,8 @@ const DemoCaret = React.forwardRef((props: DemoCaretProps, ref: any) => {
     animate: { scale: 1, opacity: 1 },
     exit: { scale: 0, opacity: 0 },
     transition: {
-      type: "spring",
-      damping: 20,
-      stiffness: 400,
+      ease: "easeInOut",
+      duration: 0.12,
     },
   };
 

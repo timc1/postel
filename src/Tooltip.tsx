@@ -279,8 +279,6 @@ export default function Tooltip(props: Props) {
   }, [props.placement]);
 
   const show = React.useCallback(() => {
-    clearTimeout(timeout.current);
-
     // 1. Add portal node into the DOM.
     const node = document.getElementById(id.current);
 
@@ -307,11 +305,9 @@ export default function Tooltip(props: Props) {
   }, [props.showDelay]);
 
   const hide = React.useCallback(() => {
-    clearTimeout(timeout.current);
-
     const actuallyHide = () => {
       // Set focus back on where the user was previously.
-      if (state.activeElement) {
+      if (state.activeElement && !props.preventAutoFocus) {
         state.activeElement.focus();
       }
 
@@ -345,22 +341,38 @@ export default function Tooltip(props: Props) {
     } else {
       triggerHide();
     }
-  }, [props.leaveDelay, props.leaveTransitionMs, state.activeElement]);
+  }, [
+    props.leaveDelay,
+    props.leaveTransitionMs,
+    state.activeElement,
+    props.preventAutoFocus,
+  ]);
+
+  const positionNode = React.useCallback(() => {
+    const position = calculateContentPosition();
+    dispatch({
+      type: "SET_POSITION",
+      payload: position,
+    });
+  }, [calculateContentPosition]);
 
   React.useEffect(() => {
     const toggle = toggleRef.current;
 
     const handleMouseEnter = () => {
+      clearTimeout(timeout.current);
       show();
     };
 
     const handleMouseLeave = () => {
+      clearTimeout(timeout.current);
       hide();
     };
 
     const handleClick = (event: MouseEvent) => {
       event.preventDefault();
       event.stopPropagation();
+      clearTimeout(timeout.current);
       show();
     };
 
@@ -369,6 +381,7 @@ export default function Tooltip(props: Props) {
       const target = event.target;
 
       if (content && !content.contains(target as any)) {
+        clearTimeout(timeout.current);
         hide();
       }
     };
@@ -395,9 +408,14 @@ export default function Tooltip(props: Props) {
             return;
           }
 
+          clearTimeout(timeout.current);
           hide();
         }
       }, delay);
+    };
+
+    const handleResize = () => {
+      positionNode();
     };
 
     const setupListeners = () => {
@@ -424,7 +442,13 @@ export default function Tooltip(props: Props) {
           window.addEventListener("mouseover", handleMouseLeaveContent);
         }
       }
+
+      if (state.isShowing) {
+        window.addEventListener("resize", handleResize);
+      }
     };
+
+    setupListeners();
 
     const cleanupListeners = () => {
       if (toggle) {
@@ -434,36 +458,29 @@ export default function Tooltip(props: Props) {
       }
       window.removeEventListener("click", handleOuterClick);
       window.removeEventListener("mouseover", handleMouseLeaveContent);
+      window.removeEventListener("resize", handleResize);
     };
-
-    setupListeners();
 
     return () => {
       cleanupListeners();
     };
-  }, [state.isShowing, showTrigger, leaveTrigger, show]);
+  }, [state.isShowing, showTrigger, leaveTrigger, show, positionNode]);
 
   React.useEffect(() => {
     if (state.isShowing) {
-      const position = calculateContentPosition();
-      dispatch({
-        type: "SET_POSITION",
-        payload: position,
-      });
+      positionNode();
 
       const content = contentRef.current;
-      if (content) {
+      if (content && !props.preventAutoFocus) {
         content.tabIndex = 0;
         content.focus();
       }
     }
-  }, [state.isShowing, props.title]);
+  }, [state.isShowing, props.title, positionNode]);
 
   const mapRefToChild = (child: any, ref: any, props?: any) => {
     return React.cloneElement(child, { ref, ...child.props, ...props });
   };
-
-  const root = document.getElementById(id.current);
 
   const renderProps = {
     placement: state.placement,
@@ -475,37 +492,40 @@ export default function Tooltip(props: Props) {
     <React.Fragment>
       {mapRefToChild(props.children, toggleRef)}
       {state.isShowing &&
-        root &&
         ReactDOM.createPortal(
           <React.Fragment>
-            <Positioner
-              position={state.contentPosition}
-              isShowing={state.isShowingContent}
-              role="tooltip"
-              title={props.title}
-            >
-              {props.content &&
-                mapRefToChild(
+            {props.showTransparentOverlay && <TransparentOverlay />}
+            {props.content && (
+              <Positioner
+                position={state.contentPosition}
+                isShowing={state.isShowingContent}
+                role="tooltip"
+                title={props.title}
+              >
+                {mapRefToChild(
                   typeof props.content === "function"
                     ? props.content(renderProps)
                     : props.content,
                   contentRef
                 )}
-            </Positioner>
-            <Positioner
-              position={state.caretPosition}
-              isShowing={state.isShowingContent}
-            >
-              {props.caret &&
-                mapRefToChild(
+              </Positioner>
+            )}
+            {props.caret && (
+              <Positioner
+                position={state.caretPosition}
+                isShowing={state.isShowingContent}
+              >
+                {mapRefToChild(
                   typeof props.caret === "function"
                     ? props.caret(renderProps)
                     : props.caret,
                   caretRef
                 )}
-            </Positioner>
+              </Positioner>
+            )}
           </React.Fragment>,
-          root
+          // @ts-ignore
+          document.getElementById(id.current)
         )}
     </React.Fragment>
   );
@@ -533,10 +553,29 @@ function Positioner(props: PositionerProps) {
     transformOrigin: position.transformOrigin,
     transform,
     opacity: isShowing ? 1 : 0,
+    zIndex: 99999,
   };
   return (
     <div style={style} {...rest}>
       {props.children}
     </div>
+  );
+}
+
+function TransparentOverlay() {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        display: "block",
+        background: "transparent",
+        cursor: "default",
+        zIndex: 99998,
+      }}
+    ></div>
   );
 }
