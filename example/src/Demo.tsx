@@ -224,6 +224,9 @@ export default function Demo() {
           leaveTrigger={state.leaveTrigger}
           showDelay={state.showDelay}
           leaveDelay={state.leaveDelay}
+          showTransparentOverlay={
+            state.content === "custom" && state.leaveTrigger !== "mouseleave"
+          }
           leaveTransitionMs={state.animated ? 800 : undefined}
           content={({ placement, isTransitioningOut, onRequestClose }) => (
             <DemoContent

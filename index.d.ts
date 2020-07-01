@@ -14,6 +14,7 @@ export type Props = {
   leaveDelay?: number;
   leaveTransitionMs?: number;
   preventAutoFocus?: boolean;
+  showTransparentOverlay?: boolean;
 };
 
 export type State = {

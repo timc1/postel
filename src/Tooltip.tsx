@@ -289,8 +289,6 @@ export default function Tooltip(props: Props) {
     }
 
     const setShow = () => {
-      clearTimeout(timeout.current);
-
       dispatch({
         type: "TOGGLE_SHOW",
         payload: {
@@ -308,8 +306,6 @@ export default function Tooltip(props: Props) {
 
   const hide = React.useCallback(() => {
     const actuallyHide = () => {
-      clearTimeout(timeout.current);
-
       // Set focus back on where the user was previously.
       if (state.activeElement && !props.preventAutoFocus) {
         state.activeElement.focus();
@@ -363,16 +359,19 @@ export default function Tooltip(props: Props) {
     const toggle = toggleRef.current;
 
     const handleMouseEnter = () => {
+      clearTimeout(timeout.current);
       show();
     };
 
     const handleMouseLeave = () => {
+      clearTimeout(timeout.current);
       hide();
     };
 
     const handleClick = (event: MouseEvent) => {
       event.preventDefault();
       event.stopPropagation();
+      clearTimeout(timeout.current);
       show();
     };
 
@@ -381,6 +380,7 @@ export default function Tooltip(props: Props) {
       const target = event.target;
 
       if (content && !content.contains(target as any)) {
+        clearTimeout(timeout.current);
         hide();
       }
     };
@@ -407,6 +407,7 @@ export default function Tooltip(props: Props) {
             return;
           }
 
+          clearTimeout(timeout.current);
           hide();
         }
       }, delay);
@@ -476,11 +477,11 @@ export default function Tooltip(props: Props) {
     }
   }, [state.isShowing, props.title, positionNode]);
 
+  const [mounted, setMounted] = React.useState(false);
+
   const mapRefToChild = (child: any, ref: any, props?: any) => {
     return React.cloneElement(child, { ref, ...child.props, ...props });
   };
-
-  const root = document.getElementById(id.current);
 
   const renderProps = {
     placement: state.placement,
@@ -492,9 +493,9 @@ export default function Tooltip(props: Props) {
     <React.Fragment>
       {mapRefToChild(props.children, toggleRef)}
       {state.isShowing &&
-        root &&
         ReactDOM.createPortal(
           <React.Fragment>
+            {props.showTransparentOverlay && <TransparentOverlay />}
             {props.content && (
               <Positioner
                 position={state.contentPosition}
@@ -524,7 +525,8 @@ export default function Tooltip(props: Props) {
               </Positioner>
             )}
           </React.Fragment>,
-          root
+          // @ts-ignore
+          document.getElementById(id.current)
         )}
     </React.Fragment>
   );
@@ -558,5 +560,23 @@ function Positioner(props: PositionerProps) {
     <div style={style} {...rest}>
       {props.children}
     </div>
+  );
+}
+
+function TransparentOverlay() {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        display: "block",
+        background: "transparent",
+        cursor: "default",
+        zIndex: 99998,
+      }}
+    ></div>
   );
 }
