@@ -10,8 +10,11 @@ above all other content.
 Postel is built on the idea of opening a generic set of props that allow wide customizability. With
 that, we attempt to keep the API as simple as possible.
 
+- [Postel 🌑](#postel---)
 - [Usage](#usage)
+- [Props](#props)
 - [Contributing](#contributing)
+  - [Installation](#installation)
 
 <br />
 
