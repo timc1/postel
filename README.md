@@ -1,5 +1,8 @@
 # Postel 🌑
 
+[![npm version](https://badge.fury.io/js/postel.svg)](https://badge.fury.io/js/postel) <a href="#badge">
+    <img alt="code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square"></a> <img src="https://camo.githubusercontent.com/21132e0838961fbecb75077042aa9b15bc0bf6f9/68747470733a2f2f62616467656e2e6e65742f62616467652f4275696c74253230576974682f547970655363726970742f626c7565" alt="Built with Typescript badge" />
+
 Postel is a single component that you can easily extend into customized tooltips, dropdowns, flyovers –
 any type of UI which would make sense to render outside of your regular React root node, floating
 above all other content.
