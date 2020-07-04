@@ -1,6 +1,6 @@
 {
   "name": "postel",
-  "version": "0.0.0",
+  "version": "0.0.3",
   "description": "A tiny and extensible component to build tooltips, flyovers, menus, and more.",
   "main": "lib/index.js",
   "repository": "https://github.com/timc1/postel",
@@ -24,10 +24,22 @@
     "@babel/preset-react": "^7.10.1",
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
+    "@typescript-eslint/eslint-plugin": "2.x",
+    "@typescript-eslint/parser": "2.x",
+    "babel-eslint": "10.x",
     "babel-loader": "^8.1.0",
     "css-loader": "^3.5.3",
-    "eslint": "^7.3.1",
+    "eslint": "6.x",
+    "eslint-config-react-app": "^5.2.1",
+    "eslint-plugin-flowtype": "4.x",
+    "eslint-plugin-import": "2.x",
+    "eslint-plugin-jsx-a11y": "6.x",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-react": "7.x",
+    "eslint-plugin-react-app": "^6.2.2",
+    "eslint-plugin-react-hooks": "2.x",
     "framer-motion": "^1.11.1",
+    "prettier": "^2.0.5",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "style-loader": "^1.2.1",
@@ -38,7 +50,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "bugs": {
-    "url": "https://github.com/timc1/react-tooltip/issues"
+    "url": "https://github.com/timc1/postel/issues"
   },
   "keywords": [
     "react",
