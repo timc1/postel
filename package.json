@@ -1,6 +1,6 @@
 {
   "name": "postel",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A tiny and extensible component to build tooltips, flyovers, menus, and more.",
   "main": "lib/index.js",
   "repository": "https://github.com/timc1/postel",
@@ -30,6 +30,7 @@
     "babel-loader": "^8.1.0",
     "css-loader": "^3.5.3",
     "eslint": "6.x",
+    "eslint-config-prettier": "^6.11.0",
     "eslint-config-react-app": "^5.2.1",
     "eslint-plugin-flowtype": "4.x",
     "eslint-plugin-import": "2.x",
