@@ -36,6 +36,8 @@ export default function Postel(props: Props) {
         });
 
         timeout.current = setTimeout(() => {
+          clearTimeout(timeout.current);
+
           dispatch({
             type: "TRANSITION_OUT_COMPLETE",
           });
@@ -55,6 +57,8 @@ export default function Postel(props: Props) {
 
     if (delay) {
       timeout.current = setTimeout(() => {
+        clearTimeout(timeout.current);
+
         callback();
       }, delay);
     } else {
@@ -67,22 +71,16 @@ export default function Postel(props: Props) {
     (callback: () => void, delay = 0) => {
       clearTimeout(timeout.current);
 
-      if (state.isVisible) {
-        dispatch({
-          type: "PORTAL_MOUNTED",
-        });
-
+      if (state.isVisible && !state.isTransitioningOut) {
         return;
       }
 
       withDelay(callback, delay);
     },
-    [state.isVisible, withDelay]
+    [state.isVisible, state.isTransitioningOut, withDelay]
   );
 
   const handleHide = React.useCallback(() => {
-    clearTimeout(timeout.current);
-
     withDelay(() => {
       withLeaveTransition(() => {
         dispatch({
@@ -92,12 +90,28 @@ export default function Postel(props: Props) {
     }, hideDelay);
   }, [withDelay, withLeaveTransition, transitionOutMs, hideDelay]);
 
+  // Callback we're gonna give to the user – no need for withDelay here as
+  // we'd rather have the UI react immediately when this is called.
+  const onRequestClose = React.useCallback(() => {
+    withLeaveTransition(() => {
+      dispatch({
+        type: "TRIGGER_HIDE",
+      });
+    }, transitionOutMs);
+  }, [transitionOutMs, withLeaveTransition]);
+
   React.useEffect(() => {
     const toggle = toggleRef.current;
 
     // Trigger handlers.
     function handleMouseEnter() {
       withTriggerDelay(() => {
+        if (state.isTransitioningOut) {
+          dispatch({
+            type: "TRIGGER_HIDE",
+          });
+        }
+
         dispatch({
           type: "TRIGGER_SHOW",
         });
@@ -109,6 +123,12 @@ export default function Postel(props: Props) {
       event.stopPropagation();
 
       withTriggerDelay(() => {
+        if (state.isTransitioningOut) {
+          dispatch({
+            type: "TRIGGER_HIDE",
+          });
+        }
+
         dispatch({
           type: "TRIGGER_SHOW",
         });
@@ -167,6 +187,7 @@ export default function Postel(props: Props) {
     };
   }, [
     state.isVisible,
+    state.isTransitioningOut,
     trigger,
     triggerDelay,
     hideTrigger,
@@ -200,7 +221,7 @@ export default function Postel(props: Props) {
     const toggle = toggleRef.current;
     const caret = caretRef.current;
 
-    if (!isVisible || !content || !caret) {
+    if (!isVisible || !content) {
       if (type === "content") {
         return {
           style: {
@@ -259,7 +280,7 @@ export default function Postel(props: Props) {
 
   const childProps = {
     isTransitioningOut: state.isTransitioningOut,
-    onRequestClose: handleHide,
+    onRequestClose,
   };
 
   return (
