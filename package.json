@@ -1,6 +1,6 @@
 {
   "name": "postel",
-  "version": "0.0.8",
+  "version": "0.0.8-1",
   "description": "A tiny and extensible component to build tooltips, flyovers, menus, and more.",
   "main": "lib/index.js",
   "repository": "https://github.com/timc1/postel",
