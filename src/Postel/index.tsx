@@ -268,7 +268,9 @@ export default function Postel(props: Props) {
 
       {(state.isVisible || state.isMounting) && props.content && (
         <Portal onReady={handlePortalMounted}>
-          {props.showTransparentUnderlay && <TransparentUnderlay />}
+          {state.isVisible &&
+            !state.isTransitioningOut &&
+            props.showTransparentUnderlay && <TransparentUnderlay />}
           <div {...getStyles(state.isVisible, "content", placement)}>
             {mapPropsAndRefsToChildren(
               typeof props.content === "function"

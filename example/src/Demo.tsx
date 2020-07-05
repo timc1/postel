@@ -222,7 +222,7 @@ export default function Demo() {
           hideTrigger={state.leaveTrigger}
           triggerDelay={state.triggerDelay}
           hideDelay={state.hideDelay}
-          transitionOutMs={state.animated ? 80 : undefined}
+          transitionOutMs={state.animated ? 200 : undefined}
           title={state.title}
           content={({ isTransitioningOut, onRequestClose }) => (
             <DemoContent
