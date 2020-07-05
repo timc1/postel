@@ -1,6 +1,7 @@
 import * as React from "react";
-import Portal from "./Portal";
 import { Placement, State, Action, Props } from "../..";
+import Portal from "./Portal";
+import TransparentUnderlay from "./TransparentUnderlay";
 
 const initialState: State = {
   isMounting: false,
@@ -48,6 +49,19 @@ export default function Postel(props: Props) {
     []
   );
 
+  // Generic delay handler.
+  const withDelay = React.useCallback((callback: () => void, delay = 0) => {
+    clearTimeout(timeout.current);
+
+    if (delay) {
+      timeout.current = setTimeout(() => {
+        callback();
+      }, delay);
+    } else {
+      callback();
+    }
+  }, []);
+
   // Delays showing the tip.
   const withTriggerDelay = React.useCallback(
     (callback: () => void, delay = 0) => {
@@ -63,21 +77,8 @@ export default function Postel(props: Props) {
 
       withDelay(callback, delay);
     },
-    [state.isVisible]
+    [state.isVisible, withDelay]
   );
-
-  // Generic delay handler.
-  const withDelay = React.useCallback((callback: () => void, delay = 0) => {
-    clearTimeout(timeout.current);
-
-    if (delay) {
-      timeout.current = setTimeout(() => {
-        callback();
-      }, delay);
-    } else {
-      callback();
-    }
-  }, []);
 
   const handleHide = React.useCallback(() => {
     clearTimeout(timeout.current);
@@ -96,6 +97,8 @@ export default function Postel(props: Props) {
 
     // Trigger handlers.
     function handleMouseEnter() {
+      clearTimeout(timeout.current);
+
       withTriggerDelay(() => {
         dispatch({
           type: "TRIGGER_SHOW",
@@ -107,6 +110,8 @@ export default function Postel(props: Props) {
       event.preventDefault();
       event.stopPropagation();
 
+      clearTimeout(timeout.current);
+
       withTriggerDelay(() => {
         dispatch({
           type: "TRIGGER_SHOW",
@@ -116,10 +121,14 @@ export default function Postel(props: Props) {
 
     // Hide handlers.
     function handleMouseLeave() {
+      clearTimeout(timeout.current);
+
       handleHide();
     }
 
     function handleOuterClick(event: MouseEvent) {
+      clearTimeout(timeout.current);
+
       const target = event.target as Node;
       const content = contentRef.current;
       const toggle = toggleRef.current;
@@ -192,9 +201,14 @@ export default function Postel(props: Props) {
       top: 0,
       left: 0,
       transform: `translate3d(0px, 0px, 0px)`,
+      zIndex: 81,
     };
 
-    if (!isVisible) {
+    const content = contentRef.current;
+    const toggle = toggleRef.current;
+    const caret = caretRef.current;
+
+    if (!isVisible || !content || !caret) {
       if (type === "content") {
         return {
           style: {
@@ -213,10 +227,6 @@ export default function Postel(props: Props) {
         };
       }
     }
-
-    const content = contentRef.current;
-    const toggle = toggleRef.current;
-    const caret = caretRef.current;
 
     if (content && toggle) {
       const position = getPosition(content, toggle, caret, placement);
@@ -266,6 +276,7 @@ export default function Postel(props: Props) {
 
       {(state.isVisible || state.isMounting) && props.content && (
         <Portal onReady={handlePortalMounted}>
+          {props.showTransparentUnderlay && <TransparentUnderlay />}
           <div {...getStyles(state.isVisible, "content", placement)}>
             {mapPropsAndRefsToChildren(
               typeof props.content === "function"

@@ -12,6 +12,7 @@ export type SharedProps = {
   hideDelay?: number;
   title: string;
   transitionOutMs?: number;
+  showTransparentUnderlay?: boolean;
 };
 
 // Props: is there a better way to do this?
