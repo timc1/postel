@@ -97,8 +97,6 @@ export default function Postel(props: Props) {
 
     // Trigger handlers.
     function handleMouseEnter() {
-      clearTimeout(timeout.current);
-
       withTriggerDelay(() => {
         dispatch({
           type: "TRIGGER_SHOW",
@@ -110,8 +108,6 @@ export default function Postel(props: Props) {
       event.preventDefault();
       event.stopPropagation();
 
-      clearTimeout(timeout.current);
-
       withTriggerDelay(() => {
         dispatch({
           type: "TRIGGER_SHOW",
@@ -121,14 +117,10 @@ export default function Postel(props: Props) {
 
     // Hide handlers.
     function handleMouseLeave() {
-      clearTimeout(timeout.current);
-
       handleHide();
     }
 
     function handleOuterClick(event: MouseEvent) {
-      clearTimeout(timeout.current);
-
       const target = event.target as Node;
       const content = contentRef.current;
       const toggle = toggleRef.current;
