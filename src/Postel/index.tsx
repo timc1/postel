@@ -228,10 +228,6 @@ export default function Postel(props: Props) {
       }
     }
 
-    if (!content || !toggle) {
-      debugger;
-    }
-
     if (content && toggle) {
       const position = getPosition(content, toggle, caret, placement);
 
