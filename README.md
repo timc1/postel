@@ -85,6 +85,10 @@ The time in milliseconds that you want to delay hiding the `content` after trigg
 
 Important for adding leave animations – the amount of time in milliseconds you want your `content` to animate out before unmounting.
 
+#### showTransparentUnderlay?: boolean
+
+Add this if you want a hidden transparent underlay that will cover the entire screen to prevent clicks on UI outside of your `content`.
+
 
 ### Contributing
 
