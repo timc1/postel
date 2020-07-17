@@ -19,6 +19,19 @@ export default function Postel(props: Props) {
   const contentRef = React.useRef<HTMLElement | undefined>(undefined);
   const caretRef = React.useRef<HTMLElement | undefined>(undefined);
   const [state, dispatch] = React.useReducer(reducer, initialState);
+  const [_, forceRender] = React.useState({});
+
+  React.useEffect(() => {
+    function handleReposition() {
+      forceRender({});
+    }
+
+    window.addEventListener("scroll", handleReposition);
+
+    return () => {
+      window.removeEventListener("scroll", handleReposition);
+    };
+  }, [state.isVisible]);
 
   const trigger = props.trigger || "hover";
   const triggerDelay = props.triggerDelay || 0;
