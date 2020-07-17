@@ -218,6 +218,7 @@ export default function Demo() {
             state.content === "custom" && state.leaveTrigger === "click"
           }
           placement={state.placement}
+          preferredAutoPlacement="bottom"
           trigger={state.showTrigger}
           hideTrigger={state.leaveTrigger}
           triggerDelay={state.triggerDelay}

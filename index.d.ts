@@ -6,6 +6,7 @@
 export type SharedProps = {
   children: React.ReactNode;
   placement?: Placement;
+  preferredAutoPlacement?: Placement;
   triggerDelay?: number;
   trigger?: Trigger;
   hideTrigger?: HideTrigger;

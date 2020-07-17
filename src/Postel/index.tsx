@@ -207,7 +207,8 @@ export default function Postel(props: Props) {
   function getStyles(
     isVisible: boolean,
     type: "content" | "caret",
-    placement: Placement
+    placement: Placement,
+    preferredAutoPlacement?: Placement
   ) {
     const defaultStyles = {
       position: "absolute" as any, // Typescript sees "absolute" as a plain string.
@@ -242,7 +243,13 @@ export default function Postel(props: Props) {
     }
 
     if (content && toggle) {
-      const position = getPosition(content, toggle, caret, placement);
+      const position = getPosition(
+        content,
+        toggle,
+        caret,
+        placement,
+        preferredAutoPlacement
+      );
 
       if (type === "content") {
         return {
@@ -292,7 +299,14 @@ export default function Postel(props: Props) {
           {state.isVisible &&
             !state.isTransitioningOut &&
             props.showTransparentUnderlay && <TransparentUnderlay />}
-          <div {...getStyles(state.isVisible, "content", placement)}>
+          <div
+            {...getStyles(
+              state.isVisible,
+              "content",
+              placement,
+              props.preferredAutoPlacement
+            )}
+          >
             {mapPropsAndRefsToChildren(
               typeof props.content === "function"
                 ? props.content(childProps)
@@ -301,7 +315,14 @@ export default function Postel(props: Props) {
             )}
           </div>
           {props.caret && (
-            <div {...getStyles(state.isVisible, "caret", placement)}>
+            <div
+              {...getStyles(
+                state.isVisible,
+                "caret",
+                placement,
+                props.preferredAutoPlacement
+              )}
+            >
               {mapPropsAndRefsToChildren(
                 typeof props.caret === "function"
                   ? props.caret(childProps)
@@ -380,6 +401,7 @@ function getPosition(
   toggle: HTMLElement,
   caret?: HTMLElement,
   preferredPlacement: Placement = "auto",
+  preferredAutoPlacement?: Placement,
   boundingContainer?: HTMLElement
 ): {
   content: { top: number; left: number };
@@ -412,7 +434,10 @@ function getPosition(
 
   if (preferredPlacement === "auto") {
     // Default top.
-    placement = "top";
+    placement =
+      preferredAutoPlacement === "auto" || !preferredAutoPlacement
+        ? "top"
+        : preferredAutoPlacement;
 
     if (top < boundingRect.scrollY) {
       placement = "bottom";
