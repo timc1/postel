@@ -26,10 +26,10 @@ export default function Postel(props: Props) {
       forceRender({});
     }
 
-    window.addEventListener("scroll", handleReposition);
+    window.addEventListener("wheel", handleReposition);
 
     return () => {
-      window.removeEventListener("scroll", handleReposition);
+      window.removeEventListener("wheel", handleReposition);
     };
   }, [state.isVisible]);
 
