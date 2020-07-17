@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Placement, State, Action, Props } from "../..";
+import { Placement, State, Action, Props, PlacementWithoutAuto } from "../..";
 import Portal from "./Portal";
 import TransparentUnderlay from "./TransparentUnderlay";
 
@@ -221,7 +221,7 @@ export default function Postel(props: Props) {
     isVisible: boolean,
     type: "content" | "caret",
     placement: Placement,
-    preferredAutoPlacement?: Placement
+    preferredAutoPlacement?: PlacementWithoutAuto
   ) {
     const defaultStyles = {
       position: "absolute" as any, // Typescript sees "absolute" as a plain string.
@@ -414,7 +414,7 @@ function getPosition(
   toggle: HTMLElement,
   caret?: HTMLElement,
   preferredPlacement: Placement = "auto",
-  preferredAutoPlacement?: Placement,
+  preferredAutoPlacement?: PlacementWithoutAuto,
   boundingContainer?: HTMLElement
 ): {
   content: { top: number; left: number };
@@ -446,36 +446,90 @@ function getPosition(
   let placement: Placement = preferredPlacement;
 
   if (preferredPlacement === "auto") {
-    // Default top.
-    placement =
-      preferredAutoPlacement === "auto" || !preferredAutoPlacement
-        ? "top"
-        : preferredAutoPlacement;
+    // Default
+    placement = preferredAutoPlacement || "top";
 
-    if (top < boundingRect.scrollY) {
-      placement = "bottom";
+    // No room on top
+    if (top < boundingRect.scrollY && placement) {
+      if (placement === "top-start") {
+        placement = "bottom-start";
+      }
+      if (placement === "bottom-start") {
+        placement = "top-start";
+      }
+      if (placement === "top") {
+        placement = "bottom";
+      }
     }
 
+    // No room on bottom
     if (
       bottom + contentRect.height - boundingRect.scrollY >
       window.innerHeight
     ) {
-      placement = "top";
+      if (placement === "bottom-start") {
+        placement = "top-start";
+      }
+      if (placement === "bottom-end") {
+        placement = "top-end";
+      }
+      if (placement === "bottom") {
+        placement = "top";
+      }
     }
 
-    // No room on the left, but room on the right.
-    const centerWithHorizontalScroll = center - boundingRect.scrollX;
-    if (
-      centerWithHorizontalScroll < boundingRect.left &&
-      centerWithHorizontalScroll + contentRect.width <= boundingRect.width
-    ) {
-      placement = placement.concat("-start") as Placement;
-    } else if (
-      // No room on the right, but room on the left.
-      centerWithHorizontalScroll + contentRect.width > boundingRect.width &&
-      centerWithHorizontalScroll >= boundingRect.left
-    ) {
-      placement = placement.concat("-end") as Placement;
+    if (placement.includes("start") || placement.includes("end")) {
+      if (
+        toggleRect.left + contentRect.width >
+          boundingRect.width + boundingRect.scrollX ||
+        toggleRect.left < boundingRect.scrollX
+      ) {
+        placement = placement.split("-")[0] as Placement;
+      }
+    }
+
+    if (placement === "top" || placement === "bottom") {
+      const centerWithHorizontalScroll = center - boundingRect.scrollX;
+      // No room on the left, but room on the right.
+      if (
+        centerWithHorizontalScroll < boundingRect.left &&
+        centerWithHorizontalScroll + contentRect.width <= boundingRect.width
+      ) {
+        placement = placement.concat("-start") as Placement;
+      } else if (
+        // No room on the right, but room on the left.
+        centerWithHorizontalScroll + contentRect.width > boundingRect.width &&
+        centerWithHorizontalScroll >= boundingRect.left
+      ) {
+        placement = placement.concat("-end") as Placement;
+      }
+    }
+
+    if (placement === "left") {
+      if (
+        toggleRect.left - caretRect.width - contentRect.width <
+          boundingRect.scrollX &&
+        toggleRect.left +
+          toggleRect.width +
+          caretRect.width +
+          contentRect.width <
+          boundingRect.width + boundingRect.scrollX
+      ) {
+        placement = "right";
+      }
+    }
+
+    if (placement === "right") {
+      if (
+        toggleRect.left +
+          toggleRect.width +
+          caretRect.width +
+          contentRect.width >
+          boundingRect.width + boundingRect.scrollX &&
+        left - contentRect.width + caretRect.width > toggleRect.scrollX
+      ) {
+        placement = "left";
+      }
     }
   }
 

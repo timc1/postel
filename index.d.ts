@@ -6,7 +6,7 @@
 export type SharedProps = {
   children: React.ReactNode;
   placement?: Placement;
-  preferredAutoPlacement?: Placement;
+  preferredAutoPlacement?: PlacementWithoutAuto;
   triggerDelay?: number;
   trigger?: Trigger;
   hideTrigger?: HideTrigger;
@@ -66,6 +66,16 @@ export type Action =
   | {
       type: "TRANSITION_OUT_COMPLETE";
     };
+
+export type PlacementWithoutAuto =
+  | "top"
+  | "top-start"
+  | "top-end"
+  | "left"
+  | "right"
+  | "bottom"
+  | "bottom-start"
+  | "bottom-end";
 
 export type Placement =
   | "auto"

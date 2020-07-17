@@ -1,8 +1,8 @@
+import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
 import "./index.css";
 import { Placement, Trigger, HideTrigger } from "../../index";
 import Postel from "../../src/index";
-import { AnimatePresence, motion } from "framer-motion";
 
 const placements: Placement[] = [
   "auto",
