@@ -94,6 +94,14 @@ Important for adding leave animations – the amount of time in milliseconds you
 
 Add this if you want a hidden transparent underlay that will cover the entire screen to prevent clicks on UI outside of your `content`.
 
+#### verticalOffset?: number
+
+Add this if you want to vertically offset the content by n `px`s.
+
+#### horizontalOffset?: number
+
+Add this if you want to horizontally offset the content by n `px`s.
+
 ### Contributing
 
 Contributions are welcome! For requests or bugs, please create an issue [here](https://github.com/timc1/postel/issues).

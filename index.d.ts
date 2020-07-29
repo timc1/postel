@@ -14,6 +14,8 @@ export type SharedProps = {
   title: string;
   transitionOutMs?: number;
   showTransparentUnderlay?: boolean;
+  verticalOffset?: number;
+  horizontalOffset?: number;
 };
 
 // Props: is there a better way to do this?

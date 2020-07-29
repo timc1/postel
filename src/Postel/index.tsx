@@ -211,17 +211,19 @@ export default function Postel(props: Props) {
     handleHide,
   ]);
 
-  function handlePortalMounted() {
+  const handlePortalMounted = React.useCallback(() => {
     dispatch({
       type: "PORTAL_MOUNTED",
     });
-  }
+  }, []);
 
   function getStyles(
     isVisible: boolean,
     type: "content" | "caret",
     placement: Placement,
-    preferredAutoPlacement?: PlacementWithoutAuto
+    preferredAutoPlacement?: PlacementWithoutAuto,
+    verticalOffset: number = 0,
+    horizontalOffset: number = 0
   ) {
     const defaultStyles = {
       position: "absolute" as any, // Typescript sees "absolute" as a plain string.
@@ -261,7 +263,9 @@ export default function Postel(props: Props) {
         toggle,
         caret,
         placement,
-        preferredAutoPlacement
+        preferredAutoPlacement,
+        verticalOffset,
+        horizontalOffset
       );
 
       if (type === "content") {
@@ -317,7 +321,9 @@ export default function Postel(props: Props) {
               state.isVisible,
               "content",
               placement,
-              props.preferredAutoPlacement
+              props.preferredAutoPlacement,
+              props.verticalOffset,
+              props.horizontalOffset
             )}
           >
             {mapPropsAndRefsToChildren(
@@ -333,7 +339,9 @@ export default function Postel(props: Props) {
                 state.isVisible,
                 "caret",
                 placement,
-                props.preferredAutoPlacement
+                props.preferredAutoPlacement,
+                props.verticalOffset,
+                props.horizontalOffset
               )}
             >
               {mapPropsAndRefsToChildren(
@@ -415,7 +423,8 @@ function getPosition(
   caret?: HTMLElement,
   preferredPlacement: Placement = "auto",
   preferredAutoPlacement?: PlacementWithoutAuto,
-  boundingContainer?: HTMLElement
+  verticalOffset: number,
+  horizontalOffset: number
 ): {
   content: { top: number; left: number };
   caret: {
@@ -430,18 +439,36 @@ function getPosition(
   const contentRect = getOffset(content);
   const toggleRect = getOffset(toggle);
   const caretRect = caret ? getOffset(caret) : emptyOffset;
-  const boundingRect = getOffset(boundingContainer || document.documentElement);
+  const boundingRect = getOffset(document.documentElement);
 
-  const top = toggleRect.top - contentRect.height - caretRect.height * 0.5;
-  const bottom = toggleRect.top + toggleRect.height + caretRect.height * 0.5;
+  const top =
+    toggleRect.top -
+    contentRect.height -
+    caretRect.height * 0.5 +
+    verticalOffset;
+  const bottom =
+    toggleRect.top +
+    toggleRect.height +
+    caretRect.height * 0.5 -
+    verticalOffset;
   const start = toggleRect.left;
   const end = toggleRect.left + toggleRect.width - contentRect.width;
   const center =
     toggleRect.left + toggleRect.width * 0.5 - contentRect.width * 0.5;
   const verticalCenter =
     toggleRect.top + toggleRect.height * 0.5 - contentRect.height * 0.5;
-  const left = toggleRect.left - contentRect.width - caretRect.width * 0.5;
-  const right = toggleRect.left + toggleRect.width + caretRect.width * 0.5;
+  const left =
+    toggleRect.left -
+    contentRect.width -
+    caretRect.width * 0.5 +
+    1 + // 1px offset just looks better
+    horizontalOffset;
+  const right =
+    toggleRect.left +
+    toggleRect.width +
+    caretRect.width * 0.5 -
+    1 - // -1px offset just looks better
+    horizontalOffset;
 
   let placement: Placement = preferredPlacement;
 
@@ -536,7 +563,7 @@ function getPosition(
   const toggleHorizontalCenter = toggleRect.left + toggleRect.width * 0.5;
 
   const topCaret = {
-    top: toggleRect.top - caretRect.height,
+    top: toggleRect.top - caretRect.height + verticalOffset,
     left: toggleHorizontalCenter,
     transform: {
       origin: "0 0",
@@ -544,7 +571,7 @@ function getPosition(
     },
   };
   const bottomCaret = {
-    top: toggleRect.top + toggleRect.height,
+    top: toggleRect.top + toggleRect.height - verticalOffset,
     left: toggleHorizontalCenter,
     transform: {
       origin: "30% 70%",
@@ -565,7 +592,7 @@ function getPosition(
       content: { top: verticalCenter, left },
       caret: {
         top: toggleRect.top + toggleRect.height * 0.5,
-        left: toggleRect.left - caretRect.width,
+        left: toggleRect.left - caretRect.width + horizontalOffset,
         transform: {
           origin: "0 0",
           rotate: "-45deg",
@@ -576,7 +603,7 @@ function getPosition(
       content: { top: verticalCenter, left: right },
       caret: {
         top: toggleRect.top + toggleRect.height * 0.5,
-        left: toggleRect.left + toggleRect.width,
+        left: toggleRect.left + toggleRect.width - horizontalOffset,
         transform: {
           origin: "70% 30%",
           rotate: "135deg",
