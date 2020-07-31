@@ -67,6 +67,9 @@ export type Action =
     }
   | {
       type: "TRANSITION_OUT_COMPLETE";
+    }
+  | {
+      type: "CANCEL_TRANSITIONING_OUT";
     };
 
 export type PlacementWithoutAuto =

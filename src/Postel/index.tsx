@@ -19,15 +19,13 @@ export default function Postel(props: Props) {
   const contentRef = React.useRef<HTMLElement | undefined>(undefined);
   const caretRef = React.useRef<HTMLElement | undefined>(undefined);
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const [_, forceRender] = React.useState({});
+  const [, forceRender] = React.useState({});
 
   React.useEffect(() => {
     function handleReposition() {
       forceRender({});
     }
-
     window.addEventListener("wheel", handleReposition);
-
     return () => {
       window.removeEventListener("wheel", handleReposition);
     };
@@ -120,14 +118,15 @@ export default function Postel(props: Props) {
     function handleMouseEnter() {
       withTriggerDelay(() => {
         if (state.isTransitioningOut) {
+          clearTimeout(timeout.current);
           dispatch({
-            type: "TRIGGER_HIDE",
+            type: "CANCEL_TRANSITIONING_OUT",
+          });
+        } else {
+          dispatch({
+            type: "TRIGGER_SHOW",
           });
         }
-
-        dispatch({
-          type: "TRIGGER_SHOW",
-        });
       }, triggerDelay);
     }
 
@@ -137,14 +136,15 @@ export default function Postel(props: Props) {
 
       withTriggerDelay(() => {
         if (state.isTransitioningOut) {
+          clearTimeout(timeout.current);
           dispatch({
-            type: "TRIGGER_HIDE",
+            type: "CANCEL_TRANSITIONING_OUT",
+          });
+        } else {
+          dispatch({
+            type: "TRIGGER_SHOW",
           });
         }
-
-        dispatch({
-          type: "TRIGGER_SHOW",
-        });
       }, triggerDelay);
     }
 
@@ -360,6 +360,13 @@ export default function Postel(props: Props) {
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case "CANCEL_TRANSITIONING_OUT": {
+      return {
+        ...state,
+        isTransitioningOut: false,
+      };
+    }
+
     case "TRIGGER_SHOW": {
       return {
         isMounting: true,
@@ -409,6 +416,9 @@ function reducer(state: State, action: Action): State {
         isTransitioningOut: false,
       };
     }
+
+    default:
+      return state;
   }
 }
 
@@ -423,8 +433,8 @@ function getPosition(
   caret?: HTMLElement,
   preferredPlacement: Placement = "auto",
   preferredAutoPlacement?: PlacementWithoutAuto,
-  verticalOffset: number,
-  horizontalOffset: number
+  verticalOffset: number = 0,
+  horizontalOffset: number = 0
 ): {
   content: { top: number; left: number };
   caret: {
