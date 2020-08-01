@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Placement, State, Action, Props } from "../..";
+import { Placement, State, Action, Props, PlacementWithoutAuto } from "../..";
 import Portal from "./Portal";
 import TransparentUnderlay from "./TransparentUnderlay";
 
@@ -19,15 +19,13 @@ export default function Postel(props: Props) {
   const contentRef = React.useRef<HTMLElement | undefined>(undefined);
   const caretRef = React.useRef<HTMLElement | undefined>(undefined);
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const [_, forceRender] = React.useState({});
+  const [, forceRender] = React.useState({});
 
   React.useEffect(() => {
     function handleReposition() {
       forceRender({});
     }
-
     window.addEventListener("wheel", handleReposition);
-
     return () => {
       window.removeEventListener("wheel", handleReposition);
     };
@@ -120,14 +118,15 @@ export default function Postel(props: Props) {
     function handleMouseEnter() {
       withTriggerDelay(() => {
         if (state.isTransitioningOut) {
+          clearTimeout(timeout.current);
           dispatch({
-            type: "TRIGGER_HIDE",
+            type: "CANCEL_TRANSITIONING_OUT",
+          });
+        } else {
+          dispatch({
+            type: "TRIGGER_SHOW",
           });
         }
-
-        dispatch({
-          type: "TRIGGER_SHOW",
-        });
       }, triggerDelay);
     }
 
@@ -137,14 +136,15 @@ export default function Postel(props: Props) {
 
       withTriggerDelay(() => {
         if (state.isTransitioningOut) {
+          clearTimeout(timeout.current);
           dispatch({
-            type: "TRIGGER_HIDE",
+            type: "CANCEL_TRANSITIONING_OUT",
+          });
+        } else {
+          dispatch({
+            type: "TRIGGER_SHOW",
           });
         }
-
-        dispatch({
-          type: "TRIGGER_SHOW",
-        });
       }, triggerDelay);
     }
 
@@ -211,17 +211,19 @@ export default function Postel(props: Props) {
     handleHide,
   ]);
 
-  function handlePortalMounted() {
+  const handlePortalMounted = React.useCallback(() => {
     dispatch({
       type: "PORTAL_MOUNTED",
     });
-  }
+  }, []);
 
   function getStyles(
     isVisible: boolean,
     type: "content" | "caret",
     placement: Placement,
-    preferredAutoPlacement?: Placement
+    preferredAutoPlacement?: PlacementWithoutAuto,
+    verticalOffset: number = 0,
+    horizontalOffset: number = 0
   ) {
     const defaultStyles = {
       position: "absolute" as any, // Typescript sees "absolute" as a plain string.
@@ -261,7 +263,9 @@ export default function Postel(props: Props) {
         toggle,
         caret,
         placement,
-        preferredAutoPlacement
+        preferredAutoPlacement,
+        verticalOffset,
+        horizontalOffset
       );
 
       if (type === "content") {
@@ -317,7 +321,9 @@ export default function Postel(props: Props) {
               state.isVisible,
               "content",
               placement,
-              props.preferredAutoPlacement
+              props.preferredAutoPlacement,
+              props.verticalOffset,
+              props.horizontalOffset
             )}
           >
             {mapPropsAndRefsToChildren(
@@ -333,7 +339,9 @@ export default function Postel(props: Props) {
                 state.isVisible,
                 "caret",
                 placement,
-                props.preferredAutoPlacement
+                props.preferredAutoPlacement,
+                props.verticalOffset,
+                props.horizontalOffset
               )}
             >
               {mapPropsAndRefsToChildren(
@@ -352,6 +360,13 @@ export default function Postel(props: Props) {
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case "CANCEL_TRANSITIONING_OUT": {
+      return {
+        ...state,
+        isTransitioningOut: false,
+      };
+    }
+
     case "TRIGGER_SHOW": {
       return {
         isMounting: true,
@@ -401,6 +416,9 @@ function reducer(state: State, action: Action): State {
         isTransitioningOut: false,
       };
     }
+
+    default:
+      return state;
   }
 }
 
@@ -414,8 +432,9 @@ function getPosition(
   toggle: HTMLElement,
   caret?: HTMLElement,
   preferredPlacement: Placement = "auto",
-  preferredAutoPlacement?: Placement,
-  boundingContainer?: HTMLElement
+  preferredAutoPlacement?: PlacementWithoutAuto,
+  verticalOffset: number = 0,
+  horizontalOffset: number = 0
 ): {
   content: { top: number; left: number };
   caret: {
@@ -430,59 +449,131 @@ function getPosition(
   const contentRect = getOffset(content);
   const toggleRect = getOffset(toggle);
   const caretRect = caret ? getOffset(caret) : emptyOffset;
-  const boundingRect = getOffset(boundingContainer || document.documentElement);
+  const boundingRect = getOffset(document.documentElement);
 
-  const top = toggleRect.top - contentRect.height - caretRect.height * 0.5;
-  const bottom = toggleRect.top + toggleRect.height + caretRect.height * 0.5;
+  const top =
+    toggleRect.top -
+    contentRect.height -
+    caretRect.height * 0.5 +
+    verticalOffset;
+  const bottom =
+    toggleRect.top +
+    toggleRect.height +
+    caretRect.height * 0.5 -
+    verticalOffset;
   const start = toggleRect.left;
   const end = toggleRect.left + toggleRect.width - contentRect.width;
   const center =
     toggleRect.left + toggleRect.width * 0.5 - contentRect.width * 0.5;
   const verticalCenter =
     toggleRect.top + toggleRect.height * 0.5 - contentRect.height * 0.5;
-  const left = toggleRect.left - contentRect.width - caretRect.width * 0.5;
-  const right = toggleRect.left + toggleRect.width + caretRect.width * 0.5;
+  const left =
+    toggleRect.left -
+    contentRect.width -
+    caretRect.width * 0.5 +
+    1 + // 1px offset just looks better
+    horizontalOffset;
+  const right =
+    toggleRect.left +
+    toggleRect.width +
+    caretRect.width * 0.5 -
+    1 - // -1px offset just looks better
+    horizontalOffset;
 
   let placement: Placement = preferredPlacement;
 
   if (preferredPlacement === "auto") {
-    // Default top.
-    placement =
-      preferredAutoPlacement === "auto" || !preferredAutoPlacement
-        ? "top"
-        : preferredAutoPlacement;
+    // Default
+    placement = preferredAutoPlacement || "top";
 
-    if (top < boundingRect.scrollY) {
-      placement = "bottom";
+    // No room on top
+    if (top < boundingRect.scrollY && placement) {
+      if (placement === "top-start") {
+        placement = "bottom-start";
+      }
+      if (placement === "bottom-start") {
+        placement = "top-start";
+      }
+      if (placement === "top") {
+        placement = "bottom";
+      }
     }
 
+    // No room on bottom
     if (
       bottom + contentRect.height - boundingRect.scrollY >
       window.innerHeight
     ) {
-      placement = "top";
+      if (placement === "bottom-start") {
+        placement = "top-start";
+      }
+      if (placement === "bottom-end") {
+        placement = "top-end";
+      }
+      if (placement === "bottom") {
+        placement = "top";
+      }
     }
 
-    // No room on the left, but room on the right.
-    const centerWithHorizontalScroll = center - boundingRect.scrollX;
-    if (
-      centerWithHorizontalScroll < boundingRect.left &&
-      centerWithHorizontalScroll + contentRect.width <= boundingRect.width
-    ) {
-      placement = placement.concat("-start") as Placement;
-    } else if (
-      // No room on the right, but room on the left.
-      centerWithHorizontalScroll + contentRect.width > boundingRect.width &&
-      centerWithHorizontalScroll >= boundingRect.left
-    ) {
-      placement = placement.concat("-end") as Placement;
+    if (placement.includes("start") || placement.includes("end")) {
+      if (
+        toggleRect.left + contentRect.width >
+          boundingRect.width + boundingRect.scrollX ||
+        toggleRect.left < boundingRect.scrollX
+      ) {
+        placement = placement.split("-")[0] as Placement;
+      }
+    }
+
+    if (placement === "top" || placement === "bottom") {
+      const centerWithHorizontalScroll = center - boundingRect.scrollX;
+      // No room on the left, but room on the right.
+      if (
+        centerWithHorizontalScroll < boundingRect.left &&
+        centerWithHorizontalScroll + contentRect.width <= boundingRect.width
+      ) {
+        placement = placement.concat("-start") as Placement;
+      } else if (
+        // No room on the right, but room on the left.
+        centerWithHorizontalScroll + contentRect.width > boundingRect.width &&
+        centerWithHorizontalScroll >= boundingRect.left
+      ) {
+        placement = placement.concat("-end") as Placement;
+      }
+    }
+
+    if (placement === "left") {
+      if (
+        toggleRect.left - caretRect.width - contentRect.width <
+          boundingRect.scrollX &&
+        toggleRect.left +
+          toggleRect.width +
+          caretRect.width +
+          contentRect.width <
+          boundingRect.width + boundingRect.scrollX
+      ) {
+        placement = "right";
+      }
+    }
+
+    if (placement === "right") {
+      if (
+        toggleRect.left +
+          toggleRect.width +
+          caretRect.width +
+          contentRect.width >
+          boundingRect.width + boundingRect.scrollX &&
+        left - contentRect.width + caretRect.width > toggleRect.scrollX
+      ) {
+        placement = "left";
+      }
     }
   }
 
   const toggleHorizontalCenter = toggleRect.left + toggleRect.width * 0.5;
 
   const topCaret = {
-    top: toggleRect.top - caretRect.height,
+    top: toggleRect.top - caretRect.height + verticalOffset,
     left: toggleHorizontalCenter,
     transform: {
       origin: "0 0",
@@ -490,7 +581,7 @@ function getPosition(
     },
   };
   const bottomCaret = {
-    top: toggleRect.top + toggleRect.height,
+    top: toggleRect.top + toggleRect.height - verticalOffset,
     left: toggleHorizontalCenter,
     transform: {
       origin: "30% 70%",
@@ -511,7 +602,7 @@ function getPosition(
       content: { top: verticalCenter, left },
       caret: {
         top: toggleRect.top + toggleRect.height * 0.5,
-        left: toggleRect.left - caretRect.width,
+        left: toggleRect.left - caretRect.width + horizontalOffset,
         transform: {
           origin: "0 0",
           rotate: "-45deg",
@@ -522,7 +613,7 @@ function getPosition(
       content: { top: verticalCenter, left: right },
       caret: {
         top: toggleRect.top + toggleRect.height * 0.5,
-        left: toggleRect.left + toggleRect.width,
+        left: toggleRect.left + toggleRect.width - horizontalOffset,
         transform: {
           origin: "70% 30%",
           rotate: "135deg",

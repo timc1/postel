@@ -29,11 +29,12 @@ export default function Portal(props: {
     };
   }, []);
 
+  const { onReady } = props;
   React.useEffect(() => {
-    if (isReady && props.onReady) {
-      props.onReady();
+    if (isReady && onReady) {
+      onReady();
     }
-  }, [isReady]);
+  }, [isReady, onReady]);
 
   return portalNode.current ? (
     ReactDOM.createPortal(props.children, portalNode.current)

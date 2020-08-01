@@ -6,7 +6,7 @@
 export type SharedProps = {
   children: React.ReactNode;
   placement?: Placement;
-  preferredAutoPlacement?: Placement;
+  preferredAutoPlacement?: PlacementWithoutAuto;
   triggerDelay?: number;
   trigger?: Trigger;
   hideTrigger?: HideTrigger;
@@ -14,6 +14,8 @@ export type SharedProps = {
   title: string;
   transitionOutMs?: number;
   showTransparentUnderlay?: boolean;
+  verticalOffset?: number;
+  horizontalOffset?: number;
 };
 
 // Props: is there a better way to do this?
@@ -65,7 +67,20 @@ export type Action =
     }
   | {
       type: "TRANSITION_OUT_COMPLETE";
+    }
+  | {
+      type: "CANCEL_TRANSITIONING_OUT";
     };
+
+export type PlacementWithoutAuto =
+  | "top"
+  | "top-start"
+  | "top-end"
+  | "left"
+  | "right"
+  | "bottom"
+  | "bottom-start"
+  | "bottom-end";
 
 export type Placement =
   | "auto"

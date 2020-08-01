@@ -1,6 +1,6 @@
 {
   "name": "postel",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "A tiny and extensible component to build tooltips, flyovers, menus, and more.",
   "main": "lib/index.js",
   "repository": "https://github.com/timc1/postel",
@@ -53,11 +53,5 @@
   "bugs": {
     "url": "https://github.com/timc1/postel/issues"
   },
-  "keywords": [
-    "react",
-    "tooltip",
-    "flyover",
-    "popover",
-    "menu"
-  ]
+  "keywords": ["react", "tooltip", "flyover", "popover", "menu"]
 }
