@@ -112,7 +112,12 @@ export default function Postel(props: Props) {
   }, [transitionOutMs, withLeaveTransition]);
 
   React.useEffect(() => {
+    const _state = {
+      count: 0,
+      tolerance: 150,
+    }
     const toggle = toggleRef.current;
+    const content = contentRef.current;
 
     // Trigger handlers.
     function handleMouseEnter() {
@@ -123,6 +128,7 @@ export default function Postel(props: Props) {
             type: "CANCEL_TRANSITIONING_OUT",
           });
         } else {
+          _state.count += 1;
           dispatch({
             type: "TRIGGER_SHOW",
           });
@@ -150,7 +156,16 @@ export default function Postel(props: Props) {
 
     // Hide handlers.
     function handleMouseLeave() {
-      handleHide();
+      _state.count--;
+      setTimeout(() => {
+        if (_state.count) {
+          handleHide();
+        }
+      }, _state.tolerance);
+    }
+
+    function handleContentMouseEnter() {
+      _state.count += 1;
     }
 
     function handleOuterClick(event: MouseEvent) {
@@ -172,6 +187,7 @@ export default function Postel(props: Props) {
 
     // Setup listeners
     if (trigger === "hover") {
+      content?.addEventListener("mouseenter", handleContentMouseEnter);
       toggle?.addEventListener("mouseenter", handleMouseEnter);
     }
 
@@ -184,6 +200,7 @@ export default function Postel(props: Props) {
     }
 
     if (hideTrigger === "mouseleave") {
+      content?.addEventListener("mouseleave", handleMouseLeave);
       toggle?.addEventListener("mouseleave", handleMouseLeave);
     }
 
@@ -192,6 +209,8 @@ export default function Postel(props: Props) {
     }
 
     return () => {
+      content?.removeEventListener("mouseleave", handleMouseLeave);
+      content?.removeEventListener("mouseenter", handleContentMouseEnter);
       toggle?.removeEventListener("mouseenter", handleMouseEnter);
       toggle?.removeEventListener("mouseleave", handleMouseLeave);
       toggle?.removeEventListener("click", handleClick);
